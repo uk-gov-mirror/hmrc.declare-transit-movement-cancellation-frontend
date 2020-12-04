@@ -17,7 +17,7 @@
 package controllers.actions
 
 import javax.inject.Inject
-import models.UserAnswers
+import models.{LocalReferenceNumber, UserAnswers}
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
@@ -26,6 +26,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject()(
+                                       lrn: LocalReferenceNumber,
                                          val sessionRepository: SessionRepository
                                        )(implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
 
@@ -33,13 +34,18 @@ class DataRetrievalActionImpl @Inject()(
 
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    sessionRepository.get(request.identifier).map {
+    sessionRepository.get(lrn, request.eoriNumber).map {
       case None =>
-        OptionalDataRequest(request.request, request.identifier, None)
+        OptionalDataRequest(request.request, request.eoriNumber, None)
       case Some(userAnswers) =>
-        OptionalDataRequest(request.request, request.identifier, Some(userAnswers))
+        OptionalDataRequest(request.request, request.eoriNumber, Some(userAnswers))
     }
   }
+}
+
+trait DataRetrievalActionProvider {
+
+  def apply(lrn: LocalReferenceNumber): ActionTransformer[IdentifierRequest, OptionalDataRequest]
 }
 
 trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, OptionalDataRequest]

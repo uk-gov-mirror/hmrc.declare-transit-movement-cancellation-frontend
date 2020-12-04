@@ -18,7 +18,7 @@ package base
 
 import config.FrontendAppConfig
 import controllers.actions._
-import models.UserAnswers
+import models.{EoriNumber, LocalReferenceNumber, UserAnswers}
 import org.mockito.Mockito
 import org.scalatest.{BeforeAndAfterEach, FreeSpec, MustMatchers, OptionValues, TryValues}
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
@@ -40,11 +40,16 @@ trait SpecBase extends FreeSpec with MustMatchers with GuiceOneAppPerSuite with 
     Mockito.reset(mockRenderer)
   }
 
-  val userAnswersId = "id"
+  val lrn = LocalReferenceNumber("ABCD1234567890123").get
 
-  def emptyUserAnswers = UserAnswers(userAnswersId, Json.obj())
+  def emptyUserAnswers = UserAnswers(lrn, eoriNumber, Json.obj())
 
   def injector: Injector = app.injector
+
+  val configKey = "config"
+
+  val eoriNumber = EoriNumber("eoriNumber")
+
 
   def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 

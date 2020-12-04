@@ -14,11 +14,32 @@
  * limitations under the License.
  */
 
-package models.requests
+package forms
 
-import play.api.mvc.{Request, WrappedRequest}
-import models.{EoriNumber, UserAnswers}
+import forms.behaviours.BooleanFieldBehaviours
+import play.api.data.FormError
 
-case class OptionalDataRequest[A] (request: Request[A], eoriNumber: EoriNumber, userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
+class ConfirmCancellationFormProviderSpec extends BooleanFieldBehaviours {
 
-case class DataRequest[A] (request: Request[A],  eoriNumber: EoriNumber, userAnswers: UserAnswers) extends WrappedRequest[A](request)
+  val requiredKey = "confirmCancellation.error.required"
+  val invalidKey = "error.boolean"
+
+  val form = new ConfirmCancellationFormProvider()()
+
+  ".value" - {
+
+    val fieldName = "value"
+
+    behave like booleanField(
+      form,
+      fieldName,
+      invalidError = FormError(fieldName, invalidKey)
+    )
+
+    behave like mandatoryField(
+      form,
+      fieldName,
+      requiredError = FormError(fieldName, requiredKey)
+    )
+  }
+}

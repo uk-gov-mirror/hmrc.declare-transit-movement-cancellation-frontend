@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-package models.requests
+package pages
 
-import play.api.mvc.{Request, WrappedRequest}
-import models.{EoriNumber, UserAnswers}
+import pages.behaviours.PageBehaviours
 
-case class OptionalDataRequest[A] (request: Request[A], eoriNumber: EoriNumber, userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
+class ConfirmCancellationPageSpec extends PageBehaviours {
 
-case class DataRequest[A] (request: Request[A],  eoriNumber: EoriNumber, userAnswers: UserAnswers) extends WrappedRequest[A](request)
+  "ConfirmCancellationPage" - {
+
+    beRetrievable[Boolean](ConfirmCancellationPage)
+
+    beSettable[Boolean](ConfirmCancellationPage)
+
+    beRemovable[Boolean](ConfirmCancellationPage)
+  }
+}
