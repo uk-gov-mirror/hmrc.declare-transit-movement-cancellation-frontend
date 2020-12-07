@@ -16,31 +16,20 @@
 
 package controllers.actions
 
+import com.google.inject.Singleton
 import javax.inject.Inject
 import models.LocalReferenceNumber
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
-import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class DataRetrievalActionImpl @Inject()(
-                                       lrn: LocalReferenceNumber,
-                                         val sessionRepository: SessionRepository,
-                                       )(implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
+@Singleton
+class DataRetrievalActionProviderImpl @Inject()(sessionRepository: SessionRepository, ec: ExecutionContext) extends DataRetrievalActionProvider {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
-
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-
-    sessionRepository.get(lrn, request.eoriNumber).map {
-      case None =>
-        OptionalDataRequest(request.request, request.eoriNumber, None)
-      case Some(userAnswers) =>
-        OptionalDataRequest(request.request, request.eoriNumber, Some(userAnswers))
-    }
-  }
+  def apply(lrn: LocalReferenceNumber): ActionTransformer[IdentifierRequest, OptionalDataRequest] =
+    new DataRetrievalAction(lrn, ec, sessionRepository)
 }
 
 trait DataRetrievalActionProvider {
@@ -48,4 +37,15 @@ trait DataRetrievalActionProvider {
   def apply(lrn: LocalReferenceNumber): ActionTransformer[IdentifierRequest, OptionalDataRequest]
 }
 
-trait DataRetrievalAction extends ActionTransformer[IdentifierRequest, OptionalDataRequest]
+class DataRetrievalAction(
+                           lrn: LocalReferenceNumber,
+                           implicit protected val executionContext: ExecutionContext,
+                           sessionRepository: SessionRepository
+                         ) extends ActionTransformer[IdentifierRequest, OptionalDataRequest] {
+
+  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
+    sessionRepository.get(lrn, request.eoriNumber).map {
+      userAnswers =>
+        OptionalDataRequest(request.request, request.eoriNumber, userAnswers)
+    }
+}

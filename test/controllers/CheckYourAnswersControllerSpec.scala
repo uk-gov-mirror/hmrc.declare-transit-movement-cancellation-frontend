@@ -27,7 +27,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerSpec extends SpecBase with MockNunjucksRendererApp {
+class CheckYourAnswersControllerSpec extends SpecBase  with MockNunjucksRendererApp {
 
   "Check Your Answers Controller" - {
 

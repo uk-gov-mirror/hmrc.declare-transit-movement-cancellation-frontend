@@ -17,19 +17,16 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
-import matchers.JsonMatchers
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.{times, verify, when}
 import org.mockito.ArgumentMatchers.any
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
 
-class AccessibilityControllerSpec extends SpecBase  with MockitoSugar with NunjucksSupport with JsonMatchers with MockNunjucksRendererApp {
+class AccessibilityControllerSpec extends SpecBase  with MockNunjucksRendererApp {
 
   "Accessibility Controller" - {
 
