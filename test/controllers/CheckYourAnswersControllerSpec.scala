@@ -16,19 +16,18 @@
 
 package controllers
 
-import base.SpecBase
+import base.{MockNunjucksRendererApp, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.JsObject
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
-import uk.gov.hmrc.viewmodels.SummaryList
 
 import scala.concurrent.Future
 
-class CheckYourAnswersControllerSpec extends SpecBase {
+class CheckYourAnswersControllerSpec extends SpecBase  with MockNunjucksRendererApp {
 
   "Check Your Answers Controller" - {
 
@@ -39,7 +38,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(lrn).url)
 
       val result = route(application, request).value
 
@@ -59,7 +58,7 @@ class CheckYourAnswersControllerSpec extends SpecBase {
 
       val application = applicationBuilder(userAnswers = None).build()
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad().url)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(lrn).url)
 
       val result = route(application, request).value
 

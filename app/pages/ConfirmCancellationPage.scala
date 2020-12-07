@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package models.requests
+package pages
 
-import play.api.mvc.{Request, WrappedRequest}
-import models.{EoriNumber, UserAnswers}
+import play.api.libs.json.JsPath
 
-case class OptionalDataRequest[A] (request: Request[A], eoriNumber: EoriNumber, userAnswers: Option[UserAnswers]) extends WrappedRequest[A](request)
+case object ConfirmCancellationPage extends QuestionPage[Boolean] {
 
-case class DataRequest[A] (request: Request[A],  eoriNumber: EoriNumber, userAnswers: UserAnswers) extends WrappedRequest[A](request)
+  override def path: JsPath = JsPath \ toString
+
+  override def toString: String = "confirmCancellation"
+}

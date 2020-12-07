@@ -19,15 +19,28 @@ package utils
 import java.time.format.DateTimeFormatter
 
 import controllers.routes
-import models.{CheckMode, UserAnswers}
+import models.{CheckMode, LocalReferenceNumber, UserAnswers}
 import pages._
 import play.api.i18n.Messages
-import CheckYourAnswersHelper._
-import uk.gov.hmrc.viewmodels._
 import uk.gov.hmrc.viewmodels.SummaryList._
-import uk.gov.hmrc.viewmodels.Text.Literal
+import uk.gov.hmrc.viewmodels._
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
+
+  def confirmCancellation(lrn: LocalReferenceNumber): Option[Row] = userAnswers.get(ConfirmCancellationPage) map {
+    answer =>
+      Row(
+        key     = Key(msg"confirmCancellation.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value   = Value(yesOrNo(answer)),
+        actions = List(
+          Action(
+            content            = msg"site.edit",
+            href               = routes.ConfirmCancellationController.onPageLoad(lrn, CheckMode).url,
+            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"confirmCancellation.checkYourAnswersLabel"))
+          )
+        )
+      )
+  }
 
   private def yesOrNo(answer: Boolean): Content =
     if (answer) {

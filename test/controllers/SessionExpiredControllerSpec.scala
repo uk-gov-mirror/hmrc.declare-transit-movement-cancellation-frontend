@@ -16,9 +16,9 @@
 
 package controllers
 
-import base.SpecBase
+import base.{MockNunjucksRendererApp, SpecBase}
 import org.mockito.ArgumentCaptor
-import org.mockito.Matchers.any
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -26,7 +26,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class SessionExpiredControllerSpec extends SpecBase {
+class SessionExpiredControllerSpec extends SpecBase with MockNunjucksRendererApp {
 
   "Session Expired Controller" - {
 
