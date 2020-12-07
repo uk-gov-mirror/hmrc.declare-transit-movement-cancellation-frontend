@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ConfirmCancellationController @Inject()(
     override val messagesApi: MessagesApi,
     sessionRepository: SessionRepository,
-    @Navigator navigator: Navigator,
+    navigator: Navigator,
     identify: IdentifierAction,
     getData: DataRetrievalActionProvider,
     requireData: DataRequiredAction,

@@ -37,7 +37,7 @@ import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
 import scala.concurrent.Future
 
-class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRendererApp {
+class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp {
 
   def onwardRoute = Call("GET", "/foo")
 
@@ -72,7 +72,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRender
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> form.value,
+        "form"   -> form,
         "mode"   -> NormalMode,
         "lrn"    -> lrn,
         "radios" -> Radios.yesNo(form("value"))
@@ -106,7 +106,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRender
       val filledForm = form.bind(Map("value" -> "true"))
 
       val expectedJson = Json.obj(
-        "form"   -> filledForm.value,
+        "form"   -> filledForm,
         "mode"   -> NormalMode,
         "lrn"    -> lrn,
         "radios" -> Radios.yesNo(filledForm("value"))
@@ -156,7 +156,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRender
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> boundForm.value,
+        "form"   -> boundForm,
         "mode"   -> NormalMode,
         "lrn"    -> lrn,
         "radios" -> Radios.yesNo(boundForm("value"))
