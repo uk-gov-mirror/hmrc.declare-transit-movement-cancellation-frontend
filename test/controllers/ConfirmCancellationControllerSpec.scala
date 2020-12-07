@@ -19,11 +19,11 @@ package controllers
 import base.{MockNunjucksRendererApp, SpecBase}
 import forms.ConfirmCancellationFormProvider
 import matchers.JsonMatchers
-import models.{EoriNumber, NormalMode, UserAnswers}
+import models.{NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
-import org.mockito.{ArgumentCaptor, Mockito}
-import org.mockito.Mockito.{times, verify, when}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.ConfirmCancellationPage
 import play.api.inject.bind
@@ -37,7 +37,7 @@ import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
 import scala.concurrent.Future
 
-class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRendererApp with MockitoSugar with NunjucksSupport with JsonMatchers {
+class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRendererApp {
 
   def onwardRoute = Call("GET", "/foo")
 
@@ -72,7 +72,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRender
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> form,
+        "form"   -> form.value,
         "mode"   -> NormalMode,
         "lrn"    -> lrn,
         "radios" -> Radios.yesNo(form("value"))
@@ -106,7 +106,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRender
       val filledForm = form.bind(Map("value" -> "true"))
 
       val expectedJson = Json.obj(
-        "form"   -> filledForm,
+        "form"   -> filledForm.value,
         "mode"   -> NormalMode,
         "lrn"    -> lrn,
         "radios" -> Radios.yesNo(filledForm("value"))
@@ -156,7 +156,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with MockNunjucksRender
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> boundForm,
+        "form"   -> boundForm.value,
         "mode"   -> NormalMode,
         "lrn"    -> lrn,
         "radios" -> Radios.yesNo(boundForm("value"))

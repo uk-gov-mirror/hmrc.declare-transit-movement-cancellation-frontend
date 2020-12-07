@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{MockNunjucksRendererApp, SpecBase}
 import matchers.JsonMatchers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.{times, verify, when}
@@ -29,7 +29,7 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
 
-class AccessibilityControllerSpec extends SpecBase  with MockitoSugar with NunjucksSupport with JsonMatchers {
+class AccessibilityControllerSpec extends SpecBase  with MockitoSugar with NunjucksSupport with JsonMatchers with MockNunjucksRendererApp {
 
   "Accessibility Controller" - {
 

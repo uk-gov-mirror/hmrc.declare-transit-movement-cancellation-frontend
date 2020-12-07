@@ -34,7 +34,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 trait SpecBase extends FreeSpec with MustMatchers with GuiceOneAppPerSuite with OptionValues with TryValues
-  with ScalaFutures with IntegrationPatience with MockitoSugar with BeforeAndAfterEach {
+  with ScalaFutures with IntegrationPatience with MockitoSugar with BeforeAndAfterEach  with MockNunjucksRendererApp{
 
   override def beforeEach {
     Mockito.reset(mockRenderer)
@@ -50,23 +50,12 @@ trait SpecBase extends FreeSpec with MustMatchers with GuiceOneAppPerSuite with 
 
   val eoriNumber = EoriNumber("eoriNumber")
 
-
   def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
-  val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
-
   implicit def messages: Messages = messagesApi.preferred(fakeRequest)
 
-  protected def applicationBuilder(userAnswers: Option[UserAnswers] = None): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .overrides(
-        bind[DataRequiredAction].to[DataRequiredActionImpl],
-        bind[IdentifierAction].to[FakeIdentifierAction],
-        bind[DataRetrievalAction].toInstance(new FakeDataRetrievalAction(userAnswers)),
-        bind[NunjucksRenderer].toInstance(mockRenderer)
-      )
 }

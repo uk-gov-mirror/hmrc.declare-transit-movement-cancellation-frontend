@@ -17,7 +17,7 @@
 package controllers.actions
 
 import javax.inject.Inject
-import models.{LocalReferenceNumber, UserAnswers}
+import models.LocalReferenceNumber
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
@@ -27,7 +27,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DataRetrievalActionImpl @Inject()(
                                        lrn: LocalReferenceNumber,
-                                         val sessionRepository: SessionRepository
+                                         val sessionRepository: SessionRepository,
                                        )(implicit val executionContext: ExecutionContext) extends DataRetrievalAction {
 
   override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] = {
