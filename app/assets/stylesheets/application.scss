@@ -1,4 +1,6 @@
 $govuk-assets-path: "/declare-transit-movement-cancellation-frontend/assets/lib/govuk-frontend/govuk/assets/";
+$hmrc-assets-path: "/declare-transit-movement-cancellation-frontend/assets/lib/hmrc-frontend/hmrc/assets";
 
 @import "lib/govuk-frontend/govuk/all";
 @import "language-toggles.scss";
+@import "_timeout-dialog.scss";

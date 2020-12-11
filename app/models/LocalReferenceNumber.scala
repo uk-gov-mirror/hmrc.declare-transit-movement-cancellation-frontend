@@ -17,7 +17,7 @@
 package models
 
 import play.api.libs.json._
-import play.api.mvc.PathBindable
+import play.api.mvc.{JavascriptLiteral, PathBindable}
 
 final case class LocalReferenceNumber(value: String) {
   override def toString: String = value
@@ -53,5 +53,8 @@ object LocalReferenceNumber {
     override def unbind(key: String, value: LocalReferenceNumber): String =
       value.toString
   }
+
+  implicit val lrnJSLBinder: JavascriptLiteral[LocalReferenceNumber] = (value: LocalReferenceNumber) => s"""'${value.toString}'"""
+
 
 }

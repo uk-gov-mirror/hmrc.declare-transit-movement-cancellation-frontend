@@ -6,9 +6,13 @@ GET        /assets/*file                                controllers.Assets.versi
 
 GET        /language/:lang                              controllers.LanguageSwitchController.switchToLanguage(lang: String)
 
+GET         /keep-alive                                 controllers.KeepAliveController.keepAlive(lrn: Option[LocalReferenceNumber] = None)
+
+GET         /:lrn/keep-alive                            controllers.KeepAliveController.keepAlive(lrn: Option[LocalReferenceNumber])
+
 GET        /this-service-has-been-reset                 controllers.SessionExpiredController.onPageLoad
 
-GET        /:lrn/check-your-answers                          controllers.CheckYourAnswersController.onPageLoad(lrn: LocalReferenceNumber)
+GET        /:lrn/check-your-answers                     controllers.CheckYourAnswersController.onPageLoad(lrn: LocalReferenceNumber)
 
 GET        /unauthorised                                controllers.UnauthorisedController.onPageLoad
 

@@ -1,8 +1,18 @@
 {% extends "govuk/template.njk" %}
+
+{% from "hmrc/components/timeout-dialog/macro.njk"     import hmrcTimeoutDialog %}
+
 {%- set assetPath = "/assets/lib/govuk-frontend/govuk/assets" -%}
 {%- set htmlLang = request.language -%}
 
 {% block head %}
+  {% block pageHead %}{% endblock %}
+    {{ hmrcTimeoutDialog({
+      timeout: config.timeout,
+      countdown: config.countdown,
+      keepAliveUrl: routes.controllers.KeepAliveController.keepAlive(lrn).url,
+      signOutUrl: config.signOut
+    }) }}
   {% include "includes/head.njk" %}
 {% endblock %}
 
