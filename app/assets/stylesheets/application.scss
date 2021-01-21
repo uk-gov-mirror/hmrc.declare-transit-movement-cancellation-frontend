@@ -2,3 +2,6 @@ $govuk-assets-path: "/declare-transit-movement-cancellation-frontend/assets/lib/
 
 @import "lib/govuk-frontend/govuk/all";
 @import "language-toggles.scss";
+@import "partials/page-heading";
+@import "partials/header";
+@import "partials/shame";

@@ -1,4 +1,5 @@
 {% extends "govuk/template.njk" %}
+{% from "macros/hmrc-header/macro.njk"            import hmrcHeader %}
 {%- set assetPath = "/assets/lib/govuk-frontend/govuk/assets" -%}
 {%- set htmlLang = request.language -%}
 
@@ -7,26 +8,36 @@
 {% endblock %}
 
 {% block header %}
-  {{ govukHeader({
-    homepageUrl: "/declare-transit-movement-cancellation-frontend",
+  {% macro phaseBanner() %}
+      {{ messages("phaseBanner.1") }} <a class="govuk-link" href="{{ config.betaFeedbackUnauthenticatedUrl }}">{{ messages("phaseBanner.2") }}</a> {{ messages("phaseBanner.3") }}
+  {% endmacro %}
+
+  {{ hmrcHeader({
+    homepageUrl: "/common-transit-convention-cancel-departure",
     serviceName: messages("site.service_name"),
-    serviceUrl: "/declare-transit-movement-cancellation-frontend",
+    serviceUrl: "/common-transit-convention-cancel-departure",
     containerClasses: "govuk-width-container",
-    assetsPath: "/assets"
+    assetsPath: "/assets",
+    phaseBanner: {
+      show: true,
+      text: 'beta',
+      html: phaseBanner()
+    },
+    signOutHref: config.signOutUrl
   }) }}
+
 {% endblock %}
 
 {% block beforeContent %}
-  {% include "includes/phase-banner.njk" %}
 {% endblock %}
 
 {% block content %}
-  {% include "includes/language-toggles.njk" %}
   {% block mainContent %}{% endblock %}
 {% endblock %}
 
 {% block bodyEnd %}
   {% block scripts %}
+    {% block pageScripts %}{% endblock %}
     {% include "includes/scripts.njk" %}
   {% endblock %}
 {% endblock %}
