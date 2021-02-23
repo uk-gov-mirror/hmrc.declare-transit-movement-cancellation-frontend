@@ -45,8 +45,12 @@ session_expired.title = For your security, this service has been reset
 session_expired.heading = For your security, this service has been reset
 session_expired.guidance = The details you have given have been deleted because you did not continue the service for 15 minutes.
 
-unauthorised.title = You can’t access this service with this account
-unauthorised.heading = You can’t access this service with this account
+unauthorised.title = You cannot use this service
+unauthorised.heading = You cannot use this service
+unauthorised.paragraph1.1 = You must
+unauthorised.paragraph1.2 = request access to NCTS
+unauthorised.paragraph1.3 = before you can use this service.
+unauthorised.paragraph2 = If you already have access, you must contact your group administrator to update your access rights.
 
 #### Compliance statement
 
