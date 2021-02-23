@@ -36,17 +36,20 @@ class AuthenticatedIdentifierAction @Inject()(
                                                override val authConnector: AuthConnector,
                                                config: FrontendAppConfig,
                                                val parser: BodyParsers.Default
-                                             )
-                                             (implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
+                                             )(implicit val executionContext: ExecutionContext) extends IdentifierAction with AuthorisedFunctions {
 
   override def invokeBlock[A](request: Request[A], block: IdentifierRequest[A] => Future[Result]): Future[Result] = {
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorised().retrieve(Retrievals.internalId) {
-      _.map {
-        internalId => block(IdentifierRequest(request, EoriNumber(internalId)))
-      }.getOrElse(throw new UnauthorizedException("Unable to retrieve internal Id"))
+    authorised(Enrolment(config.enrolmentKey)).retrieve(Retrievals.authorisedEnrolments) {
+      enrolments =>
+        val eoriNumber: String = (for {
+          enrolment  <- enrolments.enrolments.find(_.key.equals(config.enrolmentKey))
+          identifier <- enrolment.getIdentifier(config.enrolmentIdentifierKey)
+        } yield identifier.value).getOrElse(throw InsufficientEnrolments(s"Unable to retrieve enrolment for ${config.enrolmentIdentifierKey}"))
+
+        block(IdentifierRequest(request, EoriNumber(eoriNumber)))
     } recover {
       case _: NoActiveSession =>
         Redirect(config.loginUrl, Map("continue" -> Seq(config.loginContinueUrl)))
