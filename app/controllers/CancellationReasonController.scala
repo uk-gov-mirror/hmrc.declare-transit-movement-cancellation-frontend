@@ -17,50 +17,48 @@
 package controllers
 
 import controllers.actions._
-import forms.ConfirmCancellationFormProvider
-
+import forms.CancellationReasonFormProvider
 import javax.inject.Inject
-import models.{LocalReferenceNumber, Mode, NormalMode}
+import models.{Mode, LocalReferenceNumber}
 import navigation.Navigator
-import pages.ConfirmCancellationPage
+import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import repositories.SessionRepository
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
-import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
+import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ConfirmCancellationController @Inject()(
-    override val messagesApi: MessagesApi,
-    sessionRepository: SessionRepository,
-    navigator: Navigator,
-    identify: IdentifierAction,
-    getData: DataRetrievalActionProvider,
-    requireData: DataRequiredAction,
-    formProvider: ConfirmCancellationFormProvider,
-    val controllerComponents: MessagesControllerComponents,
-    renderer: Renderer
+class CancellationReasonController @Inject()(
+                                       override val messagesApi: MessagesApi,
+                                       sessionRepository: SessionRepository,
+                                       navigator: Navigator,
+                                       identify: IdentifierAction,
+                                       getData: DataRetrievalActionProvider,
+                                       requireData: DataRequiredAction,
+                                       formProvider: CancellationReasonFormProvider,
+                                       val controllerComponents: MessagesControllerComponents,
+                                       renderer: Renderer
 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
 
   private val form = formProvider()
-  private val template = "confirmCancellation.njk"
+  private val template = "cancellationReason.njk"
 
   def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(ConfirmCancellationPage) match {
+      val preparedForm = request.userAnswers.get(CancellationReasonPage) match {
         case None => form
         case Some(value) => form.fill(value)
       }
 
       val json = Json.obj(
-        "form"   -> preparedForm,
-        "mode"   -> mode,
-        "lrn"    -> lrn,
-        "radios" -> Radios.yesNo(preparedForm("value"))
+        "form" -> preparedForm,
+        "lrn"  -> lrn,
+        "mode" -> mode
       )
 
       renderer.render(template, json).map(Ok(_))
@@ -73,23 +71,18 @@ class ConfirmCancellationController @Inject()(
         formWithErrors => {
 
           val json = Json.obj(
-            "form"   -> formWithErrors,
-            "mode"   -> mode,
-            "lrn"    -> lrn,
-            "radios" -> Radios.yesNo(formWithErrors("value"))
+            "form" -> formWithErrors,
+            "lrn"  -> lrn,
+            "mode" -> mode
           )
 
           renderer.render(template, json).map(BadRequest(_))
         },
         value =>
           for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmCancellationPage, value))
-          } yield
-            if (value == true) {
-              Redirect(controllers.routes.CancellationReasonController.onPageLoad(lrn, NormalMode))
-            } else {
-               ???
-            }
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage, value))
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(CancellationReasonPage, mode, updatedAnswers))
       )
   }
 }

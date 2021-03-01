@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import org.scalacheck.Arbitrary
-import pages._
+import play.api.libs.json.JsPath
 
+case object CancellationReasonPage extends QuestionPage[String] {
 
-trait PageGenerators {
+  override def path: JsPath = JsPath \ toString
 
-  self: Generators =>
-
-  implicit lazy val arbitraryCancellationReasonPage: Arbitrary[CancellationReasonPage.type] =
-    Arbitrary(CancellationReasonPage)
-  implicit lazy val arbitraryConfirmCancellationPage: Arbitrary[ConfirmCancellationPage.type] =
-    Arbitrary(ConfirmCancellationPage)
+  override def toString: String = "cancellationReason"
 }

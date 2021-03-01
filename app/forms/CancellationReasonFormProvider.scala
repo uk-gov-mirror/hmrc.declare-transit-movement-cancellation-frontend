@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package generators
+package forms
 
-import org.scalacheck.Arbitrary
-import pages._
+import javax.inject.Inject
 
+import forms.mappings.Mappings
+import play.api.data.Form
 
-trait PageGenerators {
+class CancellationReasonFormProvider @Inject() extends Mappings {
 
-  self: Generators =>
+  val stringFieldRegex = "[\\sa-zA-Z0-9&'@/.\\-? ]*"
 
-  implicit lazy val arbitraryCancellationReasonPage: Arbitrary[CancellationReasonPage.type] =
-    Arbitrary(CancellationReasonPage)
-  implicit lazy val arbitraryConfirmCancellationPage: Arbitrary[ConfirmCancellationPage.type] =
-    Arbitrary(ConfirmCancellationPage)
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("cancellationReason.error.required")
+        .verifying(maxLength(350, "cancellationReason.error.length"))
+        .verifying(regexp(stringFieldRegex, "cancellationReason.error.invalidCharacters"))
+    )
 }

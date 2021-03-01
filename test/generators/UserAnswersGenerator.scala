@@ -27,6 +27,7 @@ trait UserAnswersGenerator extends UserAnswersEntryGenerators with TryValues {
   self: Generators =>
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
+    arbitraryCancellationReasonAnswersEntry.arbitrary ::
     arbitraryConfirmCancellationUserAnswersEntry.arbitrary ::
     Nil
 

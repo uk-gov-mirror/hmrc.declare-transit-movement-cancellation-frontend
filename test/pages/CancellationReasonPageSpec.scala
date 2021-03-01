@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package generators
+package pages
 
-import org.scalacheck.Arbitrary
-import pages._
+import pages.behaviours.PageBehaviours
 
 
-trait PageGenerators {
+class CancellationReasonPageSpec extends PageBehaviours {
 
-  self: Generators =>
+  "CancellationReasonPage" - {
 
-  implicit lazy val arbitraryCancellationReasonPage: Arbitrary[CancellationReasonPage.type] =
-    Arbitrary(CancellationReasonPage)
-  implicit lazy val arbitraryConfirmCancellationPage: Arbitrary[ConfirmCancellationPage.type] =
-    Arbitrary(ConfirmCancellationPage)
+    beRetrievable[String](CancellationReasonPage)
+
+    beSettable[String](CancellationReasonPage)
+
+    beRemovable[String](CancellationReasonPage)
+  }
 }

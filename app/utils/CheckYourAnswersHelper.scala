@@ -27,6 +27,21 @@ import uk.gov.hmrc.viewmodels._
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
 
+  def cancellationReason: Option[Row] = userAnswers.get(CancellationReasonPage) map {
+    answer =>
+      Row(
+        key     = Key(msg"cancellationReason.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value   = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content            = msg"site.edit",
+            href               = routes.CancellationReasonController.onPageLoad(userAnswers.id, CheckMode).url,
+            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"cancellationReason.checkYourAnswersLabel"))
+          )
+        )
+      )
+  }
+
   def confirmCancellation(lrn: LocalReferenceNumber): Option[Row] = userAnswers.get(ConfirmCancellationPage) map {
     answer =>
       Row(
