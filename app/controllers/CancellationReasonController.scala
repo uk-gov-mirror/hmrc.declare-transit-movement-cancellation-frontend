@@ -16,10 +16,12 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
+
 import javax.inject.Inject
-import models.{Mode, LocalReferenceNumber}
+import models.{LocalReferenceNumber, Mode}
 import navigation.Navigator
 import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -40,6 +42,7 @@ class CancellationReasonController @Inject()(
                                        getData: DataRetrievalActionProvider,
                                        requireData: DataRequiredAction,
                                        formProvider: CancellationReasonFormProvider,
+                                       appConfig: FrontendAppConfig,
                                        val controllerComponents: MessagesControllerComponents,
                                        renderer: Renderer
 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
@@ -78,11 +81,8 @@ class CancellationReasonController @Inject()(
 
           renderer.render(template, json).map(BadRequest(_))
         },
-        value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(CancellationReasonPage, mode, updatedAnswers))
+        value => Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewArrivalsUrl}"))
+
       )
   }
 }

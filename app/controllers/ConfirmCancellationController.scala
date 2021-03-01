@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
 
@@ -34,16 +35,17 @@ import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmCancellationController @Inject()(
-    override val messagesApi: MessagesApi,
-    sessionRepository: SessionRepository,
-    navigator: Navigator,
-    identify: IdentifierAction,
-    getData: DataRetrievalActionProvider,
-    requireData: DataRequiredAction,
-    formProvider: ConfirmCancellationFormProvider,
-    val controllerComponents: MessagesControllerComponents,
-    renderer: Renderer
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
+                                               override val messagesApi: MessagesApi,
+                                               sessionRepository: SessionRepository,
+                                               navigator: Navigator,
+                                               identify: IdentifierAction,
+                                               getData: DataRetrievalActionProvider,
+                                               requireData: DataRequiredAction,
+                                               formProvider: ConfirmCancellationFormProvider,
+                                               appConfig: FrontendAppConfig,
+                                               val controllerComponents: MessagesControllerComponents,
+                                               renderer: Renderer
+                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
 
   private val form = formProvider()
   private val template = "confirmCancellation.njk"
@@ -57,9 +59,9 @@ class ConfirmCancellationController @Inject()(
       }
 
       val json = Json.obj(
-        "form"   -> preparedForm,
-        "mode"   -> mode,
-        "lrn"    -> lrn,
+        "form" -> preparedForm,
+        "mode" -> mode,
+        "lrn" -> lrn,
         "radios" -> Radios.yesNo(preparedForm("value"))
       )
 
@@ -73,23 +75,20 @@ class ConfirmCancellationController @Inject()(
         formWithErrors => {
 
           val json = Json.obj(
-            "form"   -> formWithErrors,
-            "mode"   -> mode,
-            "lrn"    -> lrn,
+            "form" -> formWithErrors,
+            "mode" -> mode,
+            "lrn" -> lrn,
             "radios" -> Radios.yesNo(formWithErrors("value"))
           )
 
           renderer.render(template, json).map(BadRequest(_))
         },
         value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmCancellationPage, value))
-          } yield
-            if (value == true) {
-              Redirect(controllers.routes.CancellationReasonController.onPageLoad(lrn, NormalMode))
-            } else {
-               ???
-            }
+          if (value) {
+            Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(lrn, NormalMode)))
+          } else {
+            Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewArrivalsUrl}"))
+          }
       )
   }
 }

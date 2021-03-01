@@ -137,6 +137,24 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     }
 
+    "must redirect to the next page when valid data is submitted and user selects No" in {
+
+      when(mockSessionRepository.set(any())) thenReturn Future.successful(false)
+
+      dataRetrievalWithData(emptyUserAnswers)
+
+      val request =
+        FakeRequest(POST, confirmCancellationRoute)
+          .withFormUrlEncodedBody(("value", "false"))
+
+      val result = route(app, request).value
+
+      status(result) mustEqual SEE_OTHER
+
+      redirectLocation(result).value mustEqual s"${frontendAppConfig.manageTransitMovementsViewArrivalsUrl}"
+
+    }
+
     "must return a Bad Request and errors when invalid data is submitted" in {
 
       when(mockRenderer.render(any(), any())(any()))

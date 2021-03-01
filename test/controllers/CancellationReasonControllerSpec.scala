@@ -17,6 +17,7 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
+import config.FrontendAppConfig
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
 import models.NormalMode
@@ -37,7 +38,7 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
 
-class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendererApp with MockitoSugar with NunjucksSupport with JsonMatchers {
+class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendererApp with MockitoSugar with NunjucksSupport with JsonMatchers  {
 
   def onwardRoute = Call("GET", "/foo")
 
@@ -130,7 +131,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual onwardRoute.url
+      redirectLocation(result).value mustEqual s"${frontendAppConfig.manageTransitMovementsViewArrivalsUrl}"
 
     }
 
