@@ -130,10 +130,10 @@ compliant.nine.p2.2=Digital Accessibility Centre
 compliant.nine.p2.3=The full service was tested by HMRC and included disabled users.
 compliant.nine.p3=This page was prepared on [date when it was first published]. It was last updated on [date when it was last updated].
 
-confirmCancellation.title = confirmCancellation
-confirmCancellation.heading = confirmCancellation
-confirmCancellation.checkYourAnswersLabel = confirmCancellation
-confirmCancellation.error.required = Select yes if confirmCancellation
+confirmCancellation.title = Are you sure you want to cancel this departure declaration?
+confirmCancellation.heading = Are you sure you want to cancel this departure declaration?
+confirmCancellation.checkYourAnswersLabel = Are you sure you want to cancel this departure declaration?
+confirmCancellation.error.required = Select yes if you want to cancel this departure declaration
 
 pageNotFound.title = Page not found
 pageNotFound.heading = Page not found

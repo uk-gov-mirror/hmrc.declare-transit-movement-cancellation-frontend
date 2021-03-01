@@ -14,7 +14,7 @@ GET        /unauthorised                                    controllers.Unauthor
 
 GET        /accessibility-statement                         controllers.AccessibilityController.onPageLoad
 
-GET        /:lrn/confirmCancellation                        controllers.ConfirmCancellationController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
-POST       /:lrn/confirmCancellation                        controllers.ConfirmCancellationController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
-GET        /:lrn/changeConfirmCancellation                  controllers.ConfirmCancellationController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
-POST       /:lrn/changeConfirmCancellation                  controllers.ConfirmCancellationController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
+GET        /:lrn/confirm-cancellation                        controllers.ConfirmCancellationController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
+POST       /:lrn/confirm-cancellation                        controllers.ConfirmCancellationController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
+GET        /:lrn/change-confirm-cancellation                  controllers.ConfirmCancellationController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
+POST       /:lrn/change-onfirm-cancellation                  controllers.ConfirmCancellationController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
