@@ -61,7 +61,7 @@ class ConfirmCancellationController @Inject()(
       val json = Json.obj(
         "form" -> preparedForm,
         "mode" -> mode,
-        "lrn" -> lrn,
+        "lrn" -> request.userAnswers.id,
         "radios" -> Radios.yesNo(preparedForm("value"))
       )
 
@@ -77,7 +77,7 @@ class ConfirmCancellationController @Inject()(
           val json = Json.obj(
             "form" -> formWithErrors,
             "mode" -> mode,
-            "lrn" -> lrn,
+            "lrn" -> request.userAnswers.id,
             "radios" -> Radios.yesNo(formWithErrors("value"))
           )
 

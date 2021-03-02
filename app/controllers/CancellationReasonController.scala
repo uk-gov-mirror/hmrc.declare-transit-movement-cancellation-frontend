@@ -60,7 +60,7 @@ class CancellationReasonController @Inject()(
 
       val json = Json.obj(
         "form" -> preparedForm,
-        "lrn"  -> lrn,
+        "lrn"  -> request.userAnswers.id,
         "mode" -> mode
       )
 
@@ -75,7 +75,7 @@ class CancellationReasonController @Inject()(
 
           val json = Json.obj(
             "form" -> formWithErrors,
-            "lrn"  -> lrn,
+            "lrn"  -> request.userAnswers.id,
             "mode" -> mode
           )
 
