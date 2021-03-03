@@ -19,8 +19,6 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
-
-import javax.inject.Inject
 import models.{LocalReferenceNumber, Mode, NormalMode}
 import navigation.Navigator
 import pages.ConfirmCancellationPage
@@ -32,12 +30,12 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmCancellationController @Inject()(
                                                override val messagesApi: MessagesApi,
                                                sessionRepository: SessionRepository,
-                                               navigator: Navigator,
                                                identify: IdentifierAction,
                                                getData: DataRetrievalActionProvider,
                                                requireData: DataRequiredAction,
@@ -50,25 +48,20 @@ class ConfirmCancellationController @Inject()(
   private val form = formProvider()
   private val template = "confirmCancellation.njk"
 
-  def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
+  def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(ConfirmCancellationPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
       val json = Json.obj(
-        "form" -> preparedForm,
+        "form" -> form,
         "mode" -> mode,
-        "lrn" -> request.userAnswers.id,
-        "radios" -> Radios.yesNo(preparedForm("value"))
+        "lrn" -> lrn,
+        "radios" -> Radios.yesNo(form("value"))
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
+  def onSubmit(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -77,7 +70,7 @@ class ConfirmCancellationController @Inject()(
           val json = Json.obj(
             "form" -> formWithErrors,
             "mode" -> mode,
-            "lrn" -> request.userAnswers.id,
+            "lrn" -> lrn,
             "radios" -> Radios.yesNo(formWithErrors("value"))
           )
 

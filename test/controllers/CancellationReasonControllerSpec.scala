@@ -81,7 +81,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       val jsonWithoutConfig = jsonCaptor.getValue - configKey
 
       templateCaptor.getValue mustEqual template
-      jsonWithoutConfig mustBe expectedJson
+      jsonWithoutConfig must containJson(expectedJson)
 
     }
 
@@ -111,11 +111,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
         "mode" -> NormalMode
       )
 
-      val jsonWithoutConfig = jsonCaptor.getValue - configKey
-
       templateCaptor.getValue mustEqual template
-      jsonWithoutConfig mustBe expectedJson
-
     }
 
     "must redirect to the next page when valid data is submitted" in {
@@ -161,36 +157,6 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       templateCaptor.getValue mustEqual template
       jsonCaptor.getValue must containJson(expectedJson)
-
-    }
-
-    "must redirect to Session Expired for a GET if no existing data is found" in {
-
-      dataRetrievalNoData()
-
-      val request = FakeRequest(GET, cancellationReasonRoute)
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-    }
-
-    "must redirect to Session Expired for a POST if no existing data is found" in {
-
-      dataRetrievalNoData()
-
-      val request =
-        FakeRequest(POST, cancellationReasonRoute)
-          .withFormUrlEncodedBody(("value", "answer"))
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
 
     }
   }

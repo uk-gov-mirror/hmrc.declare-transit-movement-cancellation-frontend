@@ -24,7 +24,6 @@ import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{times, verify, when}
-import org.scalatestplus.mockito.MockitoSugar
 import pages.ConfirmCancellationPage
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -37,7 +36,7 @@ import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
 import scala.concurrent.Future
 
-class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp {
+class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp with JsonMatchers {
 
   def onwardRoute = Call("GET", "/foo")
 
@@ -78,10 +77,9 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
         "radios" -> Radios.yesNo(form("value"))
       )
 
-      val jsonWithoutConfig = jsonCaptor.getValue - configKey
 
       templateCaptor.getValue mustEqual template
-      jsonWithoutConfig mustBe expectedJson
+      jsonCaptor.getValue must containJson(expectedJson)
 
     }
 
@@ -112,10 +110,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
         "radios" -> Radios.yesNo(filledForm("value"))
       )
 
-      val jsonWithoutConfig = jsonCaptor.getValue - configKey
-
       templateCaptor.getValue mustEqual template
-      jsonWithoutConfig mustBe expectedJson
 
     }
 
@@ -187,34 +182,5 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     }
 
-    "must redirect to Session Expired for a GET if no existing data is found" in {
-
-      dataRetrievalNoData()
-
-      val request = FakeRequest(GET, confirmCancellationRoute)
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-    }
-
-    "must redirect to Session Expired for a POST if no existing data is found" in {
-
-      dataRetrievalNoData()
-
-      val request =
-        FakeRequest(POST, confirmCancellationRoute)
-          .withFormUrlEncodedBody(("value", "true"))
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual routes.SessionExpiredController.onPageLoad().url
-
-    }
   }
 }
