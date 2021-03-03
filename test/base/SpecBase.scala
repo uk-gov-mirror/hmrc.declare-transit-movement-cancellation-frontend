@@ -17,7 +17,7 @@
 package base
 
 import config.FrontendAppConfig
-import models.{EoriNumber, LocalReferenceNumber, UserAnswers}
+import models.{DepartureId, EoriNumber, LocalReferenceNumber, UserAnswers}
 import org.mockito.Mockito
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
@@ -38,9 +38,9 @@ trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with O
     Mockito.reset(mockRenderer)
   }
 
-  val lrn = LocalReferenceNumber("ABCD1234567890123").get
+  val departureId = DepartureId(1)
 
-  def emptyUserAnswers = UserAnswers(lrn, eoriNumber, Json.obj())
+  def emptyUserAnswers = UserAnswers(departureId, eoriNumber, Json.obj())
 
   def injector: Injector = app.injector
 

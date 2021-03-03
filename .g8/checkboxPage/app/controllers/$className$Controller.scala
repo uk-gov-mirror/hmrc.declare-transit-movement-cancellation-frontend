@@ -3,7 +3,7 @@ package controllers
 import controllers.actions._
 import forms.$className$FormProvider
 import javax.inject.Inject
-import models.{Mode, LocalReferenceNumber, $className$}
+import models.{Mode, $className$}
 import navigation.Navigator
 import navigation.annotations.$navRoute$
 import pages.$className$Page
@@ -32,7 +32,7 @@ class $className$Controller @Inject()(
   private val form = formProvider()
   private val template = "$className;format="decap"$.njk"
 
-  def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
     implicit request =>
 
       val preparedForm = request.userAnswers.get($className$Page) match {
@@ -43,14 +43,14 @@ class $className$Controller @Inject()(
       val json = Json.obj(
         "form"       -> preparedForm,
         "mode"       -> mode,
-        "lrn"        -> lrn,
+        "departureId"        -> departureId,
         "checkboxes" -> $className$.checkboxes(preparedForm)
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -59,7 +59,7 @@ class $className$Controller @Inject()(
           val json = Json.obj(
             "form"       -> formWithErrors,
             "mode"       -> mode,
-            "lrn"        -> lrn,
+            "departureId"        -> departureId,
             "checkboxes" -> $className$.checkboxes(formWithErrors)
           )
 

@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
-import models.{LocalReferenceNumber, Mode}
+import models.{DepartureId, LocalReferenceNumber, Mode}
 import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
@@ -47,19 +47,19 @@ class CancellationReasonController @Inject()(
   private val form = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
       val json = Json.obj(
         "form" -> form,
-        "lrn"  -> lrn,
+        "departureId"  -> departureId,
         "mode" -> mode
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = identify.async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -67,14 +67,16 @@ class CancellationReasonController @Inject()(
 
           val json = Json.obj(
             "form" -> formWithErrors,
-            "lrn"  -> lrn,
+            "departureId"  -> departureId,
             "mode" -> mode
           )
 
           renderer.render(template, json).map(BadRequest(_))
-        },
-        value => Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewArrivalsUrl}"))
 
+        },
+        value =>
+          Future.successful(Redirect(controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)))
+        //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
       )
   }
 }

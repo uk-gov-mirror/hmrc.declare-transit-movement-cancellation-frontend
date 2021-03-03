@@ -19,9 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
-import models.{LocalReferenceNumber, Mode, NormalMode}
-import navigation.Navigator
-import pages.ConfirmCancellationPage
+import models.{DepartureId, LocalReferenceNumber, Mode, NormalMode}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -48,20 +46,20 @@ class ConfirmCancellationController @Inject()(
   private val form = formProvider()
   private val template = "confirmCancellation.njk"
 
-  def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
       val json = Json.obj(
         "form" -> form,
         "mode" -> mode,
-        "lrn" -> lrn,
+        "departureId" -> departureId,
         "radios" -> Radios.yesNo(form("value"))
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = identify.async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
       form.bindFromRequest().fold(
@@ -70,7 +68,7 @@ class ConfirmCancellationController @Inject()(
           val json = Json.obj(
             "form" -> formWithErrors,
             "mode" -> mode,
-            "lrn" -> lrn,
+            "departureId" -> departureId,
             "radios" -> Radios.yesNo(formWithErrors("value"))
           )
 
@@ -78,7 +76,7 @@ class ConfirmCancellationController @Inject()(
         },
         value =>
           if (value) {
-            Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(lrn, NormalMode)))
+            Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(departureId)))
           } else {
             Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewArrivalsUrl}"))
           }

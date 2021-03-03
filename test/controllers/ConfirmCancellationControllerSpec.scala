@@ -44,7 +44,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
   private val form = formProvider()
   private val template = "confirmCancellation.njk"
 
-  lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(lrn, NormalMode).url
+  lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(departureId).url
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -73,7 +73,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       val expectedJson = Json.obj(
         "form"   -> form,
         "mode"   -> NormalMode,
-        "lrn"    -> lrn,
+        "departureId"    -> departureId,
         "radios" -> Radios.yesNo(form("value"))
       )
 
@@ -88,7 +88,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers = UserAnswers(lrn, eoriNumber).set(ConfirmCancellationPage, true).success.value
+      val userAnswers = UserAnswers(departureId, eoriNumber).set(ConfirmCancellationPage, true).success.value
       dataRetrievalWithData(userAnswers)
 
       val request = FakeRequest(GET, confirmCancellationRoute)
@@ -106,7 +106,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       val expectedJson = Json.obj(
         "form"   -> filledForm,
         "mode"   -> NormalMode,
-        "lrn"    -> lrn,
+        "departureId"    -> departureId,
         "radios" -> Radios.yesNo(filledForm("value"))
       )
 
@@ -128,7 +128,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       status(result) mustEqual SEE_OTHER
 
-      redirectLocation(result).value mustEqual s"${controllers.routes.CancellationReasonController.onPageLoad(lrn, NormalMode)}"
+      redirectLocation(result).value mustEqual s"${controllers.routes.CancellationReasonController.onPageLoad(departureId)}"
 
     }
 
@@ -171,7 +171,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       val expectedJson = Json.obj(
         "form"   -> boundForm,
         "mode"   -> NormalMode,
-        "lrn"    -> lrn,
+        "departureId"    -> departureId,
         "radios" -> Radios.yesNo(boundForm("value"))
       )
 

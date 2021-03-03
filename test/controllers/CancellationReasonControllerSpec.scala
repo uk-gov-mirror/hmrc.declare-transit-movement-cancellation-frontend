@@ -46,7 +46,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
   private val form = formProvider()
   private val template = "cancellationReason.njk"
 
-  lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(lrn, NormalMode).url
+  lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(departureId).url
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -75,7 +75,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       val expectedJson = Json.obj(
         "form"   -> form,
         "mode"   -> NormalMode,
-        "lrn"    -> lrn
+        "departureId"    -> departureId
       )
 
       val jsonWithoutConfig = jsonCaptor.getValue - configKey
@@ -107,7 +107,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       val expectedJson = Json.obj(
         "form" -> filledForm,
-        "lrn"  -> lrn,
+        "departureId"  -> departureId,
         "mode" -> NormalMode
       )
 
@@ -151,7 +151,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       val expectedJson = Json.obj(
         "form" -> boundForm,
-        "lrn"  -> lrn,
+        "departureId"  -> departureId,
         "mode" -> NormalMode
       )
 

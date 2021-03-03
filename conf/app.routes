@@ -8,18 +8,16 @@ GET        /language/:lang                                  controllers.Language
 
 GET        /this-service-has-been-reset                     controllers.SessionExpiredController.onPageLoad
 
-GET        /:lrn/check-your-answers                         controllers.CheckYourAnswersController.onPageLoad(lrn: LocalReferenceNumber)
+GET        /:departureId/check-your-answers                         controllers.CheckYourAnswersController.onPageLoad(departureId: DepartureId)
 
 GET        /unauthorised                                    controllers.UnauthorisedController.onPageLoad
 
 GET        /accessibility-statement                         controllers.AccessibilityController.onPageLoad
 
-GET        /:lrn/confirm-cancellation                        controllers.ConfirmCancellationController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
-POST       /:lrn/confirm-cancellation                        controllers.ConfirmCancellationController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
-GET        /:lrn/change-confirm-cancellation                  controllers.ConfirmCancellationController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
-POST       /:lrn/change-onfirm-cancellation                  controllers.ConfirmCancellationController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
+GET        /:departureId/confirm-cancellation                        controllers.ConfirmCancellationController.onPageLoad(departureId: DepartureId, mode: Mode = NormalMode)
+POST       /:departureId/confirm-cancellation                        controllers.ConfirmCancellationController.onSubmit(departureId: DepartureId, mode: Mode = NormalMode)
 
-GET        /:lrn/cancellation-reason                        controllers.CancellationReasonController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
-POST       /:lrn/cancellation-reason                        controllers.CancellationReasonController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = NormalMode)
-GET        /:lrn/change-cancellation-reason                  controllers.CancellationReasonController.onPageLoad(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
-POST       /:lrn/change-cancellation-reason                  controllers.CancellationReasonController.onSubmit(lrn: LocalReferenceNumber, mode: Mode = CheckMode)
+GET        /:departureId/cancellation-reason                        controllers.CancellationReasonController.onPageLoad(departureId: DepartureId, mode: Mode = NormalMode)
+POST       /:departureId/cancellation-reason                        controllers.CancellationReasonController.onSubmit(departureId: DepartureId, mode: Mode = NormalMode)
+
+GET        /:departureId/cancellation-submission-confirmation                       controllers.CancellationSubmissionConfirmationController.onPageLoad(departureId: DepartureId)

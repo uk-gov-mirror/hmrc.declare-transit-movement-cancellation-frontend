@@ -37,7 +37,7 @@ trait UserAnswersGenerator extends UserAnswersEntryGenerators with TryValues {
 
     Arbitrary {
       for {
-        id         <- arbitrary[LocalReferenceNumber]
+        id         <- arbitrary[DepartureId]
         eoriNumber <- arbitrary[EoriNumber]
         data <- generators match {
           case Nil => Gen.const(Map[QuestionPage[_], JsValue]())

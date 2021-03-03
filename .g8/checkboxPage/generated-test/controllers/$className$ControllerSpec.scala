@@ -28,7 +28,7 @@ class $className$ControllerSpec extends SpecBase with MockNunjucksRendererApp wi
 
   def onwardRoute = Call("GET", "/foo")
 
-  lazy val $className;format="decap"$Route = routes.$className$Controller.onPageLoad(lrn, NormalMode).url
+  lazy val $className;format="decap"$Route = routes.$className$Controller.onPageLoad(departureId, NormalMode).url
 
   private val formProvider = new $className$FormProvider()
   private val form = formProvider()
@@ -59,7 +59,7 @@ class $className$ControllerSpec extends SpecBase with MockNunjucksRendererApp wi
       val expectedJson = Json.obj(
         "form"       -> form,
         "mode"       -> NormalMode,
-        "lrn"        -> lrn,
+        "departureId"        -> departureId,
         "checkboxes" -> $className$.checkboxes(form)
       )
 
@@ -92,7 +92,7 @@ class $className$ControllerSpec extends SpecBase with MockNunjucksRendererApp wi
       val expectedJson = Json.obj(
         "form"       -> filledForm,
         "mode"       -> NormalMode,
-        "lrn"        -> lrn,
+        "departureId"        -> departureId,
         "checkboxes" -> $className$.checkboxes(filledForm)
       )
 
@@ -139,7 +139,7 @@ class $className$ControllerSpec extends SpecBase with MockNunjucksRendererApp wi
       val expectedJson = Json.obj(
         "form"       -> boundForm,
         "mode"       -> NormalMode,
-        "lrn"        -> lrn,
+        "departureId"        -> departureId,
         "checkboxes" -> $className$.checkboxes(boundForm)
       )
 

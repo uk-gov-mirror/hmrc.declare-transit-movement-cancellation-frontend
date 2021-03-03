@@ -17,10 +17,10 @@
 package repositories
 
 import java.time.LocalDateTime
-
 import akka.stream.Materializer
+
 import javax.inject.Inject
-import models.{EoriNumber, LocalReferenceNumber, UserAnswers}
+import models.{DepartureId, EoriNumber, LocalReferenceNumber, UserAnswers}
 import play.api.Configuration
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -55,8 +55,8 @@ class DefaultSessionRepository @Inject()(
       _.indexesManager.ensure(lastUpdatedIndex)
     }.map(_ => ())
 
-  override def get(lrn: LocalReferenceNumber, eoriNumber: EoriNumber): Future[Option[UserAnswers]] =
-    collection.flatMap(_.find(Json.obj("_id" -> lrn), None).one[UserAnswers])
+  override def get(departureId: DepartureId, eoriNumber: EoriNumber): Future[Option[UserAnswers]] =
+    collection.flatMap(_.find(Json.obj("_id" -> departureId), None).one[UserAnswers])
 
   override def set(userAnswers: UserAnswers): Future[Boolean] = {
 
@@ -82,7 +82,7 @@ trait SessionRepository {
 
   val started: Future[Unit]
 
-  def get(lrn: LocalReferenceNumber, eoriNumber: EoriNumber): Future[Option[UserAnswers]]
+  def get(departureId: DepartureId, eoriNumber: EoriNumber): Future[Option[UserAnswers]]
 
   def set(userAnswers: UserAnswers): Future[Boolean]
 }
