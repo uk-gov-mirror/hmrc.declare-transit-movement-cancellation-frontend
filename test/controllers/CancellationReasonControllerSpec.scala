@@ -127,7 +127,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result).value mustEqual s"${frontendAppConfig.manageTransitMovementsViewArrivalsUrl}"
+      redirectLocation(result).value mustEqual s"${controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)}"
 
     }
 

@@ -44,20 +44,5 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
         }
       }
     }
-
-    "in Check mode" - {
-
-      "must go from a page that doesn't exist in the edit route map  to Check Your Answers" in {
-
-        case object UnknownPage extends Page
-
-        forAll(arbitrary[UserAnswers]) {
-          answers =>
-
-            navigator.nextPage(UnknownPage, CheckMode, answers)
-              .mustBe(routes.CheckYourAnswersController.onPageLoad(answers.id))
-        }
-      }
-    }
   }
 }
