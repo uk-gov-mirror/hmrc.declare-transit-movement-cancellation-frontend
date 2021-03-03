@@ -28,7 +28,7 @@
           }) }}
         {% endif %}
 
-        <form action="{{ routes.controllers.CancellationReasonController.onSubmit(lrn, mode).url }}" method="post">
+        <form action="{{ routes.controllers.CancellationReasonController.onSubmit(departureId, mode).url }}" method="post">
 
           {{ csrf() | safe }}
 

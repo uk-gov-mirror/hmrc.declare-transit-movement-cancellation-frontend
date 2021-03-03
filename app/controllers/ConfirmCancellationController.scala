@@ -61,7 +61,6 @@ class ConfirmCancellationController @Inject()(
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
-
       form.bindFromRequest().fold(
         formWithErrors => {
 
@@ -71,12 +70,12 @@ class ConfirmCancellationController @Inject()(
             "departureId" -> departureId,
             "radios" -> Radios.yesNo(formWithErrors("value"))
           )
-
           renderer.render(template, json).map(BadRequest(_))
         },
         value =>
           if (value) {
-            Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(departureId)))
+               Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(departureId)))
+
           } else {
             Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewArrivalsUrl}"))
           }

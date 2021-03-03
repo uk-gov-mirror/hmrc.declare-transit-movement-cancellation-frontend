@@ -1,0 +1,62 @@
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package connectors
+
+import config.FrontendAppConfig
+import models.DepartureId
+import play.api.Logger
+import play.api.http.HeaderNames
+import uk.gov.hmrc.http.HttpReads.is2xx
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import CustomHttpReads.rawHttpResponseHttpReads
+import models.response.ResponseDeparture
+
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+
+
+class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) {
+  val logger: Logger          = Logger(getClass)
+  private val channel: String = "web"
+
+
+  def getDeparture(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[Option[ResponseDeparture]] = {
+    val serviceUrl = s"${appConfig.departureFullServiceUrl}"
+    val header     = hc.withExtraHeaders(ChannelHeader(channel))
+
+    http.GET[HttpResponse](serviceUrl)(rawHttpResponseHttpReads, header, ec) map {
+      case responseMessage if is2xx(responseMessage.status) =>
+          Option(responseMessage.json.as[ResponseDeparture])
+      case _ =>
+        logger.error("getCancellationDecisionUpdateMessage failed to return data")
+        None
+    }
+  }
+
+  object ChannelHeader {
+    def apply(value: String): (String, String) = ("Channel", value)
+  }
+
+  object ContentTypeHeader {
+    def apply(value: String): (String, String) = (HeaderNames.CONTENT_TYPE, value)
+  }
+
+  object AuthorizationHeader {
+    def apply(value: String): (String, String) = (HeaderNames.AUTHORIZATION, value)
+  }
+}
