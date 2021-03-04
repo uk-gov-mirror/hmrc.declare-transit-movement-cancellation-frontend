@@ -19,18 +19,13 @@ package models.response
 import models.LocalReferenceNumber
 import play.api.libs.json.{Reads, __}
 
-case class ResponseDeparture(
-                              referenceNumber: Option[LocalReferenceNumber],
-                                movementReferenceNumber: Option[String]
-                            )
+case class ResponseDeparture(localReferenceNumber: LocalReferenceNumber, status:String)
+import play.api.libs.functional.syntax._
 
 object ResponseDeparture {
-
-   implicit val reads: Reads[ResponseDeparture] = {
-     import play.api.libs.functional.syntax._
-     ((__ \ "referenceNumber").readNullable[LocalReferenceNumber] and
-      (__ \ "movementReferenceNumber").readNullable[String]
-       ) (ResponseDeparture.apply _)
-   }
+  implicit val reads: Reads[ResponseDeparture] = (
+      (__ \ "referenceNumber").read[LocalReferenceNumber] and
+      (__ \ "status").read[String]
+    )(ResponseDeparture.apply _)
 
 }

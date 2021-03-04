@@ -43,7 +43,7 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
       case responseMessage if is2xx(responseMessage.status) =>
           Option(responseMessage.json.as[ResponseDeparture])
       case _ =>
-        logger.error("getCancellationDecisionUpdateMessage failed to return data")
+        logger.error("getDeparture failed to return data")
         None
     }
   }
