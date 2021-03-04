@@ -25,13 +25,14 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
+import connectors.DepartureMovementConnector
 
 import scala.concurrent.ExecutionContext
 
 class CancellationSubmissionConfirmationController @Inject()(
                                        override val messagesApi: MessagesApi,
                                        identify: IdentifierAction,
-
+                                       departureMovementConnector: DepartureMovementConnector,
                                        val controllerComponents: MessagesControllerComponents,
                                        renderer: Renderer
 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
@@ -39,7 +40,7 @@ class CancellationSubmissionConfirmationController @Inject()(
   def onPageLoad(departureId: DepartureId): Action[AnyContent] = identify.async {
     implicit request =>
 
-      val json = Json.obj("departureId" -> departureId)
+      val json = Json.obj("lrn" -> departureMovementConnector.getDeparture(departureId).exists(_.referenceNumber))
 
       renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
   }
