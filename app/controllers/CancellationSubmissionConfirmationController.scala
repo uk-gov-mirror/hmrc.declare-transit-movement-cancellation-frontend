@@ -25,8 +25,9 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
+
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class CancellationSubmissionConfirmationController @Inject()(
                                                               override val messagesApi: MessagesApi,
@@ -38,13 +39,14 @@ class CancellationSubmissionConfirmationController @Inject()(
 
   def onPageLoad(departureId: DepartureId): Action[AnyContent] = identify.async {
     implicit request =>
-      val lrn = departureMovementConnector.getDeparture(departureId).map((responseDeparture: Option[ResponseDeparture])
-                    => responseDeparture.get.localReferenceNumber).toString
-
-      val json = Json.obj(
-        "lrn" -> lrn
-      )
-
-      renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
+                          departureMovementConnector.getDeparture(departureId).flatMap{
+                            case Some(responseDeparture: ResponseDeparture) =>
+                              val json= Json.obj(
+                                "lrn" -> responseDeparture.localReferenceNumber
+                              )
+                              renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
+                            case None =>
+                              renderer.render("cancellationSubmissionConfirmation.njk", Json.obj()).map(Ok(_))
+                          }
   }
 }
