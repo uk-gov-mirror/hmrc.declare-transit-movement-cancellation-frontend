@@ -16,76 +16,67 @@
 
 package connectors
 
+import helper.WireMockServerHandler
+import com.github.tomakehurst.wiremock.client.WireMock._
 import base.SpecBase
+import config.FrontendAppConfig
 import generators.Generators
+import models.LocalReferenceNumber
 import models.response.ResponseDeparture
-import models.{DepartureId, LocalReferenceNumber}
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.Json
 
-import java.time.LocalDateTime
 
-class DeparturesMovementConnectorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
+class DeparturesMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators{
 
   private lazy val connector: DepartureMovementConnector =
     app.injector.instanceOf[DepartureMovementConnector]
   private val startUrl = "transits-movements-trader-at-departure"
 
-  private val localDateTime: LocalDateTime = LocalDateTime.now()
 
-  private val departuresResponseJson =
-    Json.obj(
-      "departures" ->
-        Json.arr(
-          Json.obj(
-            "departureId"     -> 22,
-            "updated"         -> localDateTime,
+  private val departuresResponseJson = Json.obj(
             "referenceNumber" -> "lrn",
             "status"          -> "Submitted"
           )
-        )
-    )
+
 
   val errorResponses: Gen[Int] = Gen.chooseNum(400, 599)
 
-//  "DeparturesMovementConnector" - {
-//    "getDepartures" - {
-//      "must return a successful future response" in {
-//        val expectedResult = {
-//          ResponseDeparture(
-//            (
-//                Some(LocalReferenceNumber("lrn")),
-//                Some("mrn")
-//              )
-//            )
-//
-//        }
-//
-//        server.stubFor(
-//          get(urlEqualTo(s"/$startUrl/movements/departures"))
-//            .withHeader("Channel", containing("web"))
-//            .willReturn(okJson(departuresResponseJson.toString()))
-//        )
-//
-//        connector.getDeparture(departureId).futureValue mustBe Some(expectedResult)
-//      }
-//
-//      "must return a None when an error response is returned from getDepartures" in {
-//
-//        forAll(errorResponses) {
-//          errorResponse =>
-//            server.stubFor(
-//              get(urlEqualTo(s"/$startUrl/movements/departures"))
-//                .withHeader("Channel", containing("web"))
-//                .willReturn(
-//                  aResponse()
-//                    .withStatus(errorResponse)
-//                )
-//            )
-//            connector.getDepartures().futureValue mustBe None
-//        }
-//      }
+  "DeparturesMovementConnector" - {
+    "getDepartures" - {
+      "must return a successful future response" in {
+        val expectedResult = {
+          ResponseDeparture(
+            LocalReferenceNumber("lrn"),
+            "Submitted"
+          )
+        }
+
+        server.stubFor(
+          get(urlEqualTo(s"/$startUrl/movements/departures/1"))
+            .withHeader("channel", containing("web"))
+            .willReturn(okJson(departuresResponseJson.toString()))
+        )
+
+        connector.getDeparture(departureId).futureValue mustBe Some(expectedResult)
+      }
+
+      "must return a None when an error response is returned from getDepartures" in {
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}"))
+                .withHeader("Channel", containing("web"))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+            connector.getDeparture(departureId).futureValue mustBe None
+        }
+      }
     }
 
   }

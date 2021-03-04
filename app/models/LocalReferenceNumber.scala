@@ -28,14 +28,14 @@ object LocalReferenceNumber {
   val maxLength: Int    = 22
   private val lrnFormat = """^([a-zA-Z0-9-_]{1,22})$""".r
 
-  def apply(input: String): Option[LocalReferenceNumber] =
+  def format(input: String): Option[LocalReferenceNumber] =
     input match {
       case lrnFormat(input) => Some(new LocalReferenceNumber(input))
       case _                => None
     }
 
   implicit def reads: Reads[LocalReferenceNumber] =
-    __.read[String].map(LocalReferenceNumber.apply).flatMap {
+    __.read[String].map(LocalReferenceNumber.format).flatMap {
       case Some(lrn) => Reads(_ => JsSuccess(lrn))
       case None      => Reads(_ => JsError("Invalid Local Reference Number"))
     }
@@ -45,13 +45,11 @@ object LocalReferenceNumber {
       JsString(lrn.value)
   }
 
-  implicit def pathBindable: PathBindable[LocalReferenceNumber] = new PathBindable[LocalReferenceNumber] {
-
+  implicit lazy val pathBindable: PathBindable[LocalReferenceNumber] = new PathBindable[LocalReferenceNumber] {
     override def bind(key: String, value: String): Either[String, LocalReferenceNumber] =
-      LocalReferenceNumber.apply(value).toRight("Invalid Local Reference Number")
+      implicitly[PathBindable[String]].bind(key, value).right.map(LocalReferenceNumber(_))
 
-    override def unbind(key: String, value: LocalReferenceNumber): String =
-      value.toString
+    override def unbind(key: String, lrn: LocalReferenceNumber): String =
+      lrn.value
   }
-
 }

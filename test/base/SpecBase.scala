@@ -30,6 +30,8 @@ import play.api.inject.Injector
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.Authorization
 
 trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with OptionValues with TryValues
   with ScalaFutures with IntegrationPatience with MockitoSugar with BeforeAndAfterEach  with MockNunjucksRendererApp{
@@ -48,7 +50,7 @@ trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with O
 
   val eoriNumber = EoriNumber("eoriNumber")
 
-
+  implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
   def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
