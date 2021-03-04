@@ -17,14 +17,14 @@
 package connectors
 
 import config.FrontendAppConfig
+import connectors.CustomHttpReads.rawHttpResponseHttpReads
 import models.DepartureId
+import models.response.ResponseDeparture
 import play.api.Logger
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-import CustomHttpReads.rawHttpResponseHttpReads
-import models.response.ResponseDeparture
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,7 +36,7 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
 
 
   def getDeparture(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[Option[ResponseDeparture]] = {
-    val serviceUrl = s"${appConfig.departureFullServiceUrl}"
+    val serviceUrl = s"${appConfig.departureFullServiceUrl}/movements/departures/${departureId.index}"
     val header     = hc.withExtraHeaders(ChannelHeader(channel))
 
     http.GET[HttpResponse](serviceUrl)(rawHttpResponseHttpReads, header, ec) map {

@@ -16,31 +16,37 @@
 
 package controllers
 
+import connectors.DepartureMovementConnector
 import controllers.actions._
-
-import javax.inject.Inject
-import models.{DepartureId, LocalReferenceNumber}
+import models.DepartureId
+import models.response.ResponseDeparture
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
-import connectors.DepartureMovementConnector
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class CancellationSubmissionConfirmationController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       identify: IdentifierAction,
-                                       departureMovementConnector: DepartureMovementConnector,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       renderer: Renderer
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+                                                              override val messagesApi: MessagesApi,
+                                                              identify: IdentifierAction,
+                                                              departureMovementConnector: DepartureMovementConnector,
+                                                              val controllerComponents: MessagesControllerComponents,
+                                                              renderer: Renderer
+                                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
   def onPageLoad(departureId: DepartureId): Action[AnyContent] = identify.async {
     implicit request =>
-
-      val json = Json.obj("lrn" -> departureMovementConnector.getDeparture(departureId).exists(_.referenceNumber))
+      val lrn: String = departureMovementConnector.getDeparture(departureId).map((responseDeparture: Option[ResponseDeparture])
+                    => responseDeparture.get.referenceNumber).toString
+      val mrn: String = departureMovementConnector.getDeparture(departureId).map((responseDeparture: Option[ResponseDeparture])
+                    => responseDeparture.get.movementReferenceNumber).toString
+      val json = Json.obj(
+        "lrn" -> lrn,
+               "mrn" -> mrn
+      )
 
       renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
   }
