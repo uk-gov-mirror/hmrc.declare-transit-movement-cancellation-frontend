@@ -36,7 +36,7 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
   private val startUrl = "transits-movements-trader-at-departure"
 
   override lazy val app: Application = new GuiceApplicationBuilder()
-    .configure(conf = "microservice.services.departure.port" -> server.port())
+    .configure(conf = "microservice.services.departures.port" -> server.port())
     .build()
 
   private val departuresResponseJson = Json.obj(
