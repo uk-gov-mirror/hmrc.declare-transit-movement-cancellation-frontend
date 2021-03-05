@@ -16,30 +16,33 @@
 
 package connectors
 
-import helper.WireMockServerHandler
-import com.github.tomakehurst.wiremock.client.WireMock._
 import base.SpecBase
-import config.FrontendAppConfig
+import com.github.tomakehurst.wiremock.client.WireMock._
 import generators.Generators
+import helper.WireMockServerHandler
 import models.LocalReferenceNumber
 import models.response.ResponseDeparture
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import play.api.Application
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 
-
-class DeparturesMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators{
+class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators {
 
   private lazy val connector: DepartureMovementConnector =
     app.injector.instanceOf[DepartureMovementConnector]
+
   private val startUrl = "transits-movements-trader-at-departure"
 
+  override lazy val app: Application = new GuiceApplicationBuilder()
+    .configure(conf = "microservice.services.departure.port" -> server.port())
+    .build()
 
   private val departuresResponseJson = Json.obj(
-            "referenceNumber" -> "lrn",
-            "status"          -> "Submitted"
-          )
-
+    "referenceNumber" -> "lrn",
+    "status" -> "Submitted"
+  )
 
   val errorResponses: Gen[Int] = Gen.chooseNum(400, 599)
 
@@ -54,31 +57,14 @@ class DeparturesMovementConnectorSpec extends SpecBase with WireMockServerHandle
         }
 
         server.stubFor(
-          get(urlEqualTo(s"/$startUrl/movements/departures/1"))
-            .withHeader("channel", containing("web"))
+          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}"))
+            .withHeader("Channel", containing("web"))
             .willReturn(okJson(departuresResponseJson.toString()))
         )
 
         connector.getDeparture(departureId).futureValue mustBe Some(expectedResult)
       }
-
-      "must return a None when an error response is returned from getDepartures" in {
-
-        forAll(errorResponses) {
-          errorResponse =>
-            server.stubFor(
-              get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}"))
-                .withHeader("Channel", containing("web"))
-                .willReturn(
-                  aResponse()
-                    .withStatus(errorResponse)
-                )
-            )
-            connector.getDeparture(departureId).futureValue mustBe None
-        }
-      }
     }
 
   }
-
 }

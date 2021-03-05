@@ -36,8 +36,10 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
 
 
   def getDeparture(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[Option[ResponseDeparture]] = {
-    val serviceUrl = s"${appConfig.departureFullServiceUrl}/movements/departures/${departureId.index}"
+    val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}"
     val header     = hc.withExtraHeaders(ChannelHeader(channel))
+
+    println(serviceUrl)
 
     http.GET[HttpResponse](serviceUrl)(rawHttpResponseHttpReads, header, ec) map {
       case responseMessage if is2xx(responseMessage.status) =>

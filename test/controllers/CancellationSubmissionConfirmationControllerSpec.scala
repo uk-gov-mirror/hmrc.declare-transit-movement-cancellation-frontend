@@ -40,7 +40,7 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      dataRetrievalWithData(emptyUserAnswers)
+//      dataRetrievalWithData(emptyUserAnswers)
 
       val request = FakeRequest(GET, routes.CancellationSubmissionConfirmationController.onPageLoad(departureId).url)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
