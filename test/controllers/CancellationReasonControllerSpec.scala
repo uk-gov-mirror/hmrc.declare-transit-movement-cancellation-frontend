@@ -17,7 +17,6 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
-import config.FrontendAppConfig
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
 import models.NormalMode
@@ -104,12 +103,6 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val filledForm = form.bind(Map("value" -> "answer"))
-
-      val expectedJson = Json.obj(
-        "form" -> filledForm,
-        "departureId"  -> departureId,
-        "mode" -> NormalMode
-      )
 
       templateCaptor.getValue mustEqual template
     }

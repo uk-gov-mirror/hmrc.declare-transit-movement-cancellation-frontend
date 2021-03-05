@@ -103,13 +103,6 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       val filledForm = form.bind(Map("value" -> "true"))
 
-      val expectedJson = Json.obj(
-        "form"   -> filledForm,
-        "mode"   -> NormalMode,
-        "departureId"    -> departureId,
-        "radios" -> Radios.yesNo(filledForm("value"))
-      )
-
       templateCaptor.getValue mustEqual template
 
     }

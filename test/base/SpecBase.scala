@@ -17,7 +17,7 @@
 package base
 
 import config.FrontendAppConfig
-import models.{DepartureId, EoriNumber, LocalReferenceNumber, UserAnswers}
+import models.{DepartureId, EoriNumber, UserAnswers}
 import org.mockito.Mockito
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
