@@ -39,8 +39,6 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
     val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}"
     val header     = hc.withExtraHeaders(ChannelHeader(channel))
 
-    println(serviceUrl)
-
     http.GET[HttpResponse](serviceUrl)(rawHttpResponseHttpReads, header, ec) map {
       case responseMessage if is2xx(responseMessage.status) =>
           Option(responseMessage.json.as[ResponseDeparture])
