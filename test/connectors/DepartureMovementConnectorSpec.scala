@@ -64,6 +64,22 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
 
         connector.getDeparture(departureId).futureValue mustBe Some(expectedResult)
       }
+
+      "must return a None when an error response is returned from getDepartures" in {
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}"))
+                .withHeader("Channel", containing("web"))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+            connector.getDeparture(departureId).futureValue mustBe None
+        }
+      }
     }
 
   }
