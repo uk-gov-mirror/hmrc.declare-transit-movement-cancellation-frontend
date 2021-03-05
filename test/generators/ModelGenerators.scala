@@ -30,6 +30,13 @@ self: Generators =>
       } yield new DepartureId(departureId)
     }
 
+  implicit lazy val arbitraryLocalReferenceNumber: Arbitrary[LocalReferenceNumber] =
+    Arbitrary {
+      for {
+        lrn <- alphaNumericWithMaxLength(22)
+      } yield new LocalReferenceNumber(lrn)
+    }
+
   implicit lazy val arbitraryEoriNumber: Arbitrary[EoriNumber] =
     Arbitrary {
       for {
