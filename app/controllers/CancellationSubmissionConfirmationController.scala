@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import connectors.DepartureMovementConnector
 import controllers.actions._
 import models.DepartureId
@@ -34,6 +35,7 @@ class CancellationSubmissionConfirmationController @Inject()(
                                                               identify: IdentifierAction,
                                                               departureMovementConnector: DepartureMovementConnector,
                                                               val controllerComponents: MessagesControllerComponents,
+                                                              appConfig: FrontendAppConfig,
                                                               renderer: Renderer
                                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
 
@@ -42,7 +44,8 @@ class CancellationSubmissionConfirmationController @Inject()(
                           departureMovementConnector.getDeparture(departureId).flatMap{
                             case Some(responseDeparture: ResponseDeparture) =>
                               val json= Json.obj(
-                                "lrn" -> responseDeparture.localReferenceNumber
+                                "lrn" -> responseDeparture.localReferenceNumber,
+                                "departureList"-> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
                               )
                               renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
                             case None =>
