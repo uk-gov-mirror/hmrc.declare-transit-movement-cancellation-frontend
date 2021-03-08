@@ -101,8 +101,6 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      val filledForm = form.bind(Map("value" -> "true"))
-
       templateCaptor.getValue mustEqual template
 
     }
@@ -139,7 +137,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       status(result) mustEqual SEE_OTHER
 
-      redirectLocation(result).value mustEqual s"${frontendAppConfig.manageTransitMovementsViewArrivalsUrl}"
+      redirectLocation(result).value mustEqual s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
 
     }
 

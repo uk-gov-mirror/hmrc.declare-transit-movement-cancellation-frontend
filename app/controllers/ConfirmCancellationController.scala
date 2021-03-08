@@ -19,7 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
-import models.{DepartureId, LocalReferenceNumber, Mode, NormalMode}
+import models.{DepartureId, Mode}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -77,7 +77,7 @@ class ConfirmCancellationController @Inject()(
                Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(departureId)))
 
           } else {
-            Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewArrivalsUrl}"))
+            Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewDeparturesUrl}"))
           }
       )
   }

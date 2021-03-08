@@ -16,11 +16,8 @@
 
 package repositories
 
-import java.time.LocalDateTime
 import akka.stream.Materializer
-
-import javax.inject.Inject
-import models.{DepartureId, EoriNumber, LocalReferenceNumber, UserAnswers}
+import models.{DepartureId, EoriNumber, UserAnswers}
 import play.api.Configuration
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
@@ -29,6 +26,8 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.play.json.ImplicitBSONHandlers.JsObjectDocumentWriter
 import reactivemongo.play.json.collection.JSONCollection
 
+import java.time.LocalDateTime
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DefaultSessionRepository @Inject()(
