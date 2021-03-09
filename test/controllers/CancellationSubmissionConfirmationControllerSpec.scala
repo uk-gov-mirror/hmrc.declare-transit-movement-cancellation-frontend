@@ -21,12 +21,15 @@ import connectors.DepartureMovementConnector
 import matchers.JsonMatchers
 import models.LocalReferenceNumber
 import models.response.ResponseDeparture
+import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
+import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
@@ -35,12 +38,19 @@ import scala.concurrent.Future
 
 class CancellationSubmissionConfirmationControllerSpec extends SpecBase with MockitoSugar with JsonMatchers with MockNunjucksRendererApp {
 
+  def onwardRoute: Call = Call("GET", "/foo")
+
   private val mockDepartureResponse: ResponseDeparture = {
     ResponseDeparture(
       LocalReferenceNumber("lrn"),
       "Submitted"
     )
   }
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
 
 
   "CancellationSubmissionConfirmation Controller" - {
@@ -55,9 +65,7 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val application = applicationBuilder(userAnswers = Some(emptyUserAnswers))
-        .overrides(bind[DepartureMovementConnector].toInstance(mockConnector))
-        .build()
+      val application =  guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
 
       val request = FakeRequest(GET, routes.CancellationSubmissionConfirmationController.onPageLoad(departureId).url)
 
