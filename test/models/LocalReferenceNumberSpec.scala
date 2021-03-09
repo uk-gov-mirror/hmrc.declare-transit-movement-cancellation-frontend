@@ -28,13 +28,6 @@ class LocalReferenceNumberSpec extends AnyFreeSpec with Generators with Matchers
 
   "a Local Reference Number" - {
 
-    "must deserialise" in {
-      forAll(arbitrary[LocalReferenceNumber]) {
-        lrn =>
-          JsString(lrn.toString).as[LocalReferenceNumber] mustEqual lrn
-      }
-    }
-
     "must serialise" in {
       forAll(arbitrary[LocalReferenceNumber]) {
         lrn =>
