@@ -24,7 +24,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class FakeDataRetrievalActionProvider(dataToReturn: Option[UserAnswers]) extends DataRetrievalActionProvider {
 
-  def apply(lrdepartureIdn: DepartureId): ActionTransformer[IdentifierRequest, OptionalDataRequest] =
+  def apply(departureId: DepartureId): ActionTransformer[IdentifierRequest, OptionalDataRequest] =
     new FakeDataRetrievalAction(dataToReturn)
 }
 

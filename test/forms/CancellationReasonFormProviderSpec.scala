@@ -17,6 +17,7 @@
 package forms
 
 import forms.behaviours.StringFieldBehaviours
+import models.Constants.{commentMaxLength, stringFieldRegex}
 import org.scalacheck.Gen
 import play.api.data.{Field, FormError}
 import wolfendale.scalacheck.regexp.RegexpGen
@@ -25,8 +26,7 @@ class CancellationReasonFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey = "cancellationReason.error.required"
   val lengthKey = "cancellationReason.error.length"
-  val maxLength = 100
-  val stringFieldRegex = "[\\sa-zA-Z0-9&'@/.\\-? ]*"
+
   val form = new CancellationReasonFormProvider()()
 
   ".value" - {
@@ -36,7 +36,7 @@ class CancellationReasonFormProviderSpec extends StringFieldBehaviours {
     behave like fieldThatBindsValidData(
       form,
       fieldName,
-      stringsWithMaxLength(maxLength)
+      stringsWithMaxLength(commentMaxLength)
     )
 
     behave like mandatoryField(

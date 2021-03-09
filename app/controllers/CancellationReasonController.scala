@@ -60,7 +60,9 @@ class CancellationReasonController @Inject()(
   }
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+
     implicit request =>
+    val cancellationSubmission  = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)
 
       form.bindFromRequest().fold(
         formWithErrors => {
@@ -74,8 +76,8 @@ class CancellationReasonController @Inject()(
           renderer.render(template, json).map(BadRequest(_))
 
         },
-        value =>
-          Future.successful(Redirect(controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)))
+         value =>
+          Future.successful(Redirect(cancellationSubmission))
         //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
       )
   }

@@ -33,10 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmCancellationController @Inject()(
                                                override val messagesApi: MessagesApi,
-                                               sessionRepository: SessionRepository,
                                                identify: IdentifierAction,
-                                               getData: DataRetrievalActionProvider,
-                                               requireData: DataRequiredAction,
                                                formProvider: ConfirmCancellationFormProvider,
                                                appConfig: FrontendAppConfig,
                                                val controllerComponents: MessagesControllerComponents,
@@ -53,7 +50,9 @@ class ConfirmCancellationController @Inject()(
         "form" -> form,
         "mode" -> mode,
         "departureId" -> departureId,
-        "radios" -> Radios.yesNo(form("value"))
+        "radios" -> Radios.yesNo(form("value")),
+        "onSubmitUrl" -> controllers.routes.ConfirmCancellationController.onSubmit(departureId).url
+
       )
 
       renderer.render(template, json).map(Ok(_))
@@ -74,10 +73,12 @@ class ConfirmCancellationController @Inject()(
         },
         value =>
           if (value) {
-               Future.successful(Redirect(controllers.routes.CancellationReasonController.onPageLoad(departureId)))
+            val cancellationReason = controllers.routes.CancellationReasonController.onPageLoad(departureId)
+               Future.successful(Redirect(cancellationReason))
 
           } else {
-            Future.successful(Redirect(s"${appConfig.manageTransitMovementsViewDeparturesUrl}"))
+            val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+            Future.successful(Redirect(viewDepartures))
           }
       )
   }

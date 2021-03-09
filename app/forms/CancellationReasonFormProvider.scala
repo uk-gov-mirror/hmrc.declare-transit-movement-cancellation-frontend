@@ -17,18 +17,17 @@
 package forms
 
 import javax.inject.Inject
-
 import forms.mappings.Mappings
+import models.Constants.{commentMaxLength, stringFieldRegex}
 import play.api.data.Form
 
 class CancellationReasonFormProvider @Inject() extends Mappings {
 
-  val stringFieldRegex = "[\\sa-zA-Z0-9&'@/.\\-? ]*"
 
   def apply(): Form[String] =
     Form(
       "value" -> text("cancellationReason.error.required")
-        .verifying(maxLength(350, "cancellationReason.error.length"))
+        .verifying(maxLength(commentMaxLength, "cancellationReason.error.length"))
         .verifying(regexp(stringFieldRegex, "cancellationReason.error.invalidCharacters"))
     )
 }

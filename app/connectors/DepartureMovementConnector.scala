@@ -17,7 +17,7 @@
 package connectors
 
 import config.FrontendAppConfig
-import connectors.CustomHttpReads.rawHttpResponseHttpReads
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import models.DepartureId
 import models.response.ResponseDeparture
 import play.api.Logger
@@ -25,7 +25,6 @@ import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
-
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +38,7 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
     val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}"
     val header     = hc.withExtraHeaders(ChannelHeader(channel))
 
-    http.GET[HttpResponse](serviceUrl)(rawHttpResponseHttpReads, header, ec) map {
+    http.GET[HttpResponse](serviceUrl)(httpReads, header, ec) map {
       case responseMessage if is2xx(responseMessage.status) =>
           Option(responseMessage.json.as[ResponseDeparture])
       case _ =>
