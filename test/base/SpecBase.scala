@@ -50,7 +50,6 @@ trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with O
 
   val eoriNumber = EoriNumber("eoriNumber")
 
-  implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
   def frontendAppConfig: FrontendAppConfig = injector.instanceOf[FrontendAppConfig]
 
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]

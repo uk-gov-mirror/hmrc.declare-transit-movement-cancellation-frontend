@@ -53,7 +53,8 @@ class CancellationReasonController @Inject()(
       val json = Json.obj(
         "form" -> form,
         "departureId"  -> departureId,
-        "mode" -> mode
+        "mode" -> mode,
+        "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
       )
 
       renderer.render(template, json).map(Ok(_))

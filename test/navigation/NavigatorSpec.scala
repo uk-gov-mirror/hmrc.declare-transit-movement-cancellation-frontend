@@ -29,19 +29,15 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
   val navigator = new Navigator
 
   "Navigator" - {
-
-    "in Normal mode" - {
-
       "must go from a page that doesn't exist in the route map to Index" in {
 
         case object UnknownPage extends Page
 
         forAll(arbitrary[UserAnswers]) {
           answers =>
-
-            navigator.nextPage(UnknownPage, NormalMode, answers)
+            navigator.nextPage(UnknownPage, answers)
               .mustBe(routes.IndexController.onPageLoad())
-        }
+
       }
     }
   }

@@ -27,8 +27,11 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.Authorization
 
 class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators {
+  implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
   private lazy val connector: DepartureMovementConnector =
     app.injector.instanceOf[DepartureMovementConnector]
