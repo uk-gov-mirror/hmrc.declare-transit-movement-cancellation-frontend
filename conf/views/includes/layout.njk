@@ -2,6 +2,7 @@
 {% from "macros/hmrc-header/macro.njk"            import hmrcHeader %}
 {%- set assetPath = "/assets/lib/govuk-frontend/govuk/assets" -%}
 {%- set htmlLang = request.language -%}
+{% from "hmrc/components/report-technical-issue/macro.njk" import hmrcReportTechnicalIssue %}
 
 {% block head %}
   {% include "includes/head.njk" %}
@@ -33,6 +34,9 @@
 
 {% block content %}
   {% block mainContent %}{% endblock %}
+
+
+
 {% endblock %}
 
 {% block bodyEnd %}
