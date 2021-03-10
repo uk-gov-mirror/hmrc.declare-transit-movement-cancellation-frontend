@@ -25,7 +25,7 @@ import play.api.mvc.Call
 @Singleton
 class FrontendAppConfig @Inject() (configuration: Configuration) {
 
-  val contactHost = configuration.get[String]("contact-frontend.host")
+  val contactHost: String = configuration.get[String]("contact-frontend.host")
   val contactFormServiceIdentifier: String = "CTCTrader"
 
   val analyticsToken: String = configuration.get[String](s"google-analytics.token")
