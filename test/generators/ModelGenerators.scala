@@ -23,6 +23,13 @@ trait ModelGenerators extends UserAnswersEntryGenerators  {
 
 self: Generators =>
 
+  implicit lazy val arbitraryDepartureId: Arbitrary[DepartureId] =
+    Arbitrary {
+      for {
+        departureId <- intsBelowValue(1000000)
+      } yield new DepartureId(departureId)
+    }
+
   implicit lazy val arbitraryLocalReferenceNumber: Arbitrary[LocalReferenceNumber] =
     Arbitrary {
       for {

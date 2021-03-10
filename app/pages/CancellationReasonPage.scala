@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import play.api.libs.json._
+import play.api.libs.json.JsPath
 
-final case class LocalReferenceNumber(value: String) {
-  override def toString: String = value
-}
+case object CancellationReasonPage extends QuestionPage[String] {
 
-object LocalReferenceNumber {
+  override def path: JsPath = JsPath \ toString
 
-  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map (LocalReferenceNumber.apply)
-
-  implicit def writes: Writes[LocalReferenceNumber] = Writes {
-    lrn =>
-      JsString(lrn.value)
-  }
-
+  override def toString: String = "cancellationReason"
 }

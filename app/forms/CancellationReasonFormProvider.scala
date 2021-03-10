@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package models
+package forms
 
-import play.api.libs.json._
+import javax.inject.Inject
+import forms.mappings.Mappings
+import models.Constants.{commentMaxLength, stringFieldRegex}
+import play.api.data.Form
 
-final case class LocalReferenceNumber(value: String) {
-  override def toString: String = value
-}
+class CancellationReasonFormProvider @Inject() extends Mappings {
 
-object LocalReferenceNumber {
 
-  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map (LocalReferenceNumber.apply)
-
-  implicit def writes: Writes[LocalReferenceNumber] = Writes {
-    lrn =>
-      JsString(lrn.value)
-  }
-
+  def apply(): Form[String] =
+    Form(
+      "value" -> text("cancellationReason.error.required")
+        .verifying(maxLength(commentMaxLength, "cancellationReason.error.length"))
+        .verifying(regexp(stringFieldRegex, "cancellationReason.error.invalidCharacters"))
+    )
 }

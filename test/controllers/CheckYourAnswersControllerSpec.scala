@@ -38,7 +38,7 @@ class CheckYourAnswersControllerSpec extends SpecBase  with MockNunjucksRenderer
 
       val application = applicationBuilder(userAnswers = Some(emptyUserAnswers)).build()
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(lrn).url)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(departureId).url)
 
       val result = route(application, request).value
 
@@ -58,7 +58,7 @@ class CheckYourAnswersControllerSpec extends SpecBase  with MockNunjucksRenderer
 
       val application = applicationBuilder(userAnswers = None).build()
 
-      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(lrn).url)
+      val request = FakeRequest(GET, routes.CheckYourAnswersController.onPageLoad(departureId).url)
 
       val result = route(application, request).value
 

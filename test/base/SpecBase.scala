@@ -17,7 +17,7 @@
 package base
 
 import config.FrontendAppConfig
-import models.{EoriNumber, LocalReferenceNumber, UserAnswers}
+import models.{DepartureId, EoriNumber, UserAnswers}
 import org.mockito.Mockito
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.freespec.AnyFreeSpec
@@ -30,6 +30,8 @@ import play.api.inject.Injector
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.Authorization
 
 trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with OptionValues with TryValues
   with ScalaFutures with IntegrationPatience with MockitoSugar with BeforeAndAfterEach  with MockNunjucksRendererApp{
@@ -38,9 +40,9 @@ trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with O
     Mockito.reset(mockRenderer)
   }
 
-  val lrn = LocalReferenceNumber("ABCD1234567890123").get
+  val departureId = DepartureId(1)
 
-  def emptyUserAnswers = UserAnswers(lrn, eoriNumber, Json.obj())
+  def emptyUserAnswers = UserAnswers(departureId, eoriNumber, Json.obj())
 
   def injector: Injector = app.injector
 

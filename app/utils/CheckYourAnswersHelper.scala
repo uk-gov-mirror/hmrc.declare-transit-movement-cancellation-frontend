@@ -16,18 +16,33 @@
 
 package utils
 
-import java.time.format.DateTimeFormatter
-
 import controllers.routes
-import models.{CheckMode, LocalReferenceNumber, UserAnswers}
+import models.{DepartureId, UserAnswers}
 import pages._
 import play.api.i18n.Messages
 import uk.gov.hmrc.viewmodels.SummaryList._
 import uk.gov.hmrc.viewmodels._
 
+import java.time.format.DateTimeFormatter
+
 class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
 
-  def confirmCancellation(lrn: LocalReferenceNumber): Option[Row] = userAnswers.get(ConfirmCancellationPage) map {
+  def cancellationReason(departureId: DepartureId): Option[Row] = userAnswers.get(CancellationReasonPage) map {
+    answer =>
+      Row(
+        key     = Key(msg"cancellationReason.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value   = Value(lit"$answer"),
+        actions = List(
+          Action(
+            content            = msg"site.edit",
+            href               = routes.CancellationReasonController.onPageLoad(departureId).url,
+            visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"cancellationReason.checkYourAnswersLabel"))
+          )
+        )
+      )
+  }
+
+  def confirmCancellation(departureId: DepartureId): Option[Row] = userAnswers.get(ConfirmCancellationPage) map {
     answer =>
       Row(
         key     = Key(msg"confirmCancellation.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
@@ -35,7 +50,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messag
         actions = List(
           Action(
             content            = msg"site.edit",
-            href               = routes.ConfirmCancellationController.onPageLoad(lrn, CheckMode).url,
+            href               = routes.ConfirmCancellationController.onPageLoad(departureId).url,
             visuallyHiddenText = Some(msg"site.edit.hidden".withArgs(msg"confirmCancellation.checkYourAnswersLabel"))
           )
         )

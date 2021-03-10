@@ -16,12 +16,10 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
-import javax.inject.Inject
-import models.{LocalReferenceNumber, Mode}
-import navigation.Navigator
-import pages.ConfirmCancellationPage
+import models.{DepartureId, Mode}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -30,61 +28,58 @@ import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmCancellationController @Inject()(
-    override val messagesApi: MessagesApi,
-    sessionRepository: SessionRepository,
-    navigator: Navigator,
-    identify: IdentifierAction,
-    getData: DataRetrievalActionProvider,
-    requireData: DataRequiredAction,
-    formProvider: ConfirmCancellationFormProvider,
-    val controllerComponents: MessagesControllerComponents,
-    renderer: Renderer
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
+                                               override val messagesApi: MessagesApi,
+                                               identify: IdentifierAction,
+                                               formProvider: ConfirmCancellationFormProvider,
+                                               appConfig: FrontendAppConfig,
+                                               val controllerComponents: MessagesControllerComponents,
+                                               renderer: Renderer
+                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
 
   private val form = formProvider()
   private val template = "confirmCancellation.njk"
 
-  def onPageLoad(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
-      val preparedForm = request.userAnswers.get(ConfirmCancellationPage) match {
-        case None => form
-        case Some(value) => form.fill(value)
-      }
-
       val json = Json.obj(
-        "form"   -> preparedForm,
-        "mode"   -> mode,
-        "lrn"    -> lrn,
-        "radios" -> Radios.yesNo(preparedForm("value"))
+        "form" -> form,
+        "mode" -> mode,
+        "departureId" -> departureId,
+        "radios" -> Radios.yesNo(form("value")),
+        "onSubmitUrl" -> controllers.routes.ConfirmCancellationController.onSubmit(departureId).url
+
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(lrn: LocalReferenceNumber, mode: Mode): Action[AnyContent] = (identify andThen getData(lrn) andThen requireData).async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
-
       form.bindFromRequest().fold(
         formWithErrors => {
 
           val json = Json.obj(
-            "form"   -> formWithErrors,
-            "mode"   -> mode,
-            "lrn"    -> lrn,
+            "form" -> formWithErrors,
+            "mode" -> mode,
+            "departureId" -> departureId,
             "radios" -> Radios.yesNo(formWithErrors("value"))
           )
-
           renderer.render(template, json).map(BadRequest(_))
         },
         value =>
-          for {
-            updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmCancellationPage, value))
-            _              <- sessionRepository.set(updatedAnswers)
-          } yield Redirect(navigator.nextPage(ConfirmCancellationPage, mode, updatedAnswers))
+          if (value) {
+            val cancellationReason = controllers.routes.CancellationReasonController.onPageLoad(departureId)
+               Future.successful(Redirect(cancellationReason))
+
+          } else {
+            val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+            Future.successful(Redirect(viewDepartures))
+          }
       )
   }
 }

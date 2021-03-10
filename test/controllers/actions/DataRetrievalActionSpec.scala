@@ -19,7 +19,7 @@ package controllers.actions
 import base.SpecBase
 import generators.Generators
 import models.requests.{IdentifierRequest, OptionalDataRequest}
-import models.{EoriNumber, LocalReferenceNumber, UserAnswers}
+import models.{EoriNumber, DepartureId, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -47,11 +47,11 @@ class DataRetrievalActionSpec extends SpecBase with GuiceOneAppPerSuite with Gen
       .build()
   }
 
-  def harness(lrn: LocalReferenceNumber, f: OptionalDataRequest[AnyContent] => Unit): Unit = {
+  def harness(departureId: DepartureId, f: OptionalDataRequest[AnyContent] => Unit): Unit = {
 
     lazy val actionProvider = app.injector.instanceOf[DataRetrievalActionProviderImpl]
 
-    actionProvider(lrn)
+    actionProvider(departureId)
       .invokeBlock(
         IdentifierRequest(FakeRequest(GET, "/").asInstanceOf[Request[AnyContent]], EoriNumber("")), {
           request: OptionalDataRequest[AnyContent] =>
@@ -70,7 +70,7 @@ class DataRetrievalActionSpec extends SpecBase with GuiceOneAppPerSuite with Gen
 
         when(sessionRepository.get(any(), any())) thenReturn Future.successful(None)
 
-        harness(lrn, request => request.userAnswers must not be defined)
+        harness(departureId, request => request.userAnswers must not be defined)
       }
     }
 
@@ -78,9 +78,9 @@ class DataRetrievalActionSpec extends SpecBase with GuiceOneAppPerSuite with Gen
 
       "when there are existing answers for this LRN" in {
 
-        when(sessionRepository.get(any(), any())) thenReturn Future.successful(Some(UserAnswers(lrn, eoriNumber)))
+        when(sessionRepository.get(any(), any())) thenReturn Future.successful(Some(UserAnswers(departureId, eoriNumber)))
 
-        harness(lrn, request => request.userAnswers mustBe defined)
+        harness(departureId, request => request.userAnswers mustBe defined)
       }
     }
   }

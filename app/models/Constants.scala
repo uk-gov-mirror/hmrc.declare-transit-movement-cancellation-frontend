@@ -16,19 +16,8 @@
 
 package models
 
-import play.api.libs.json._
-
-final case class LocalReferenceNumber(value: String) {
-  override def toString: String = value
-}
-
-object LocalReferenceNumber {
-
-  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map (LocalReferenceNumber.apply)
-
-  implicit def writes: Writes[LocalReferenceNumber] = Writes {
-    lrn =>
-      JsString(lrn.value)
-  }
+object Constants {
+  val stringFieldRegex = "[\\sa-zA-Z0-9&'@/.\\-? ]*"
+  val commentMaxLength = 350
 
 }

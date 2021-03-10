@@ -27,6 +27,7 @@ trait UserAnswersGenerator extends UserAnswersEntryGenerators with TryValues {
   self: Generators =>
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
+    arbitraryCancellationReasonAnswersEntry.arbitrary ::
     arbitraryConfirmCancellationUserAnswersEntry.arbitrary ::
     Nil
 
@@ -36,7 +37,7 @@ trait UserAnswersGenerator extends UserAnswersEntryGenerators with TryValues {
 
     Arbitrary {
       for {
-        id         <- arbitrary[LocalReferenceNumber]
+        id         <- arbitrary[DepartureId]
         eoriNumber <- arbitrary[EoriNumber]
         data <- generators match {
           case Nil => Gen.const(Map[QuestionPage[_], JsValue]())

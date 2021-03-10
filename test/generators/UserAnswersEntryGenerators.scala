@@ -18,12 +18,20 @@ package generators
 
 import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary.arbitrary
-import pages.ConfirmCancellationPage
+import pages.{CancellationReasonPage, ConfirmCancellationPage}
 import play.api.libs.json.{JsValue, Json}
 
 trait UserAnswersEntryGenerators extends PageGenerators {
 
   self: Generators =>
+
+  implicit lazy val arbitraryCancellationReasonAnswersEntry: Arbitrary[(CancellationReasonPage.type, JsValue)] =
+    Arbitrary {
+      for {
+        page  <- arbitrary[CancellationReasonPage.type]
+        value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
+      } yield (page, value)
+    }
 
 
   implicit lazy val arbitraryConfirmCancellationUserAnswersEntry: Arbitrary[(ConfirmCancellationPage.type, JsValue)] =

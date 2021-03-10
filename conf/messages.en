@@ -130,10 +130,10 @@ compliant.nine.p2.2=Digital Accessibility Centre
 compliant.nine.p2.3=The full service was tested by HMRC and included disabled users.
 compliant.nine.p3=This page was prepared on [date when it was first published]. It was last updated on [date when it was last updated].
 
-confirmCancellation.title = confirmCancellation
-confirmCancellation.heading = confirmCancellation
-confirmCancellation.checkYourAnswersLabel = confirmCancellation
-confirmCancellation.error.required = Select yes if confirmCancellation
+confirmCancellation.title = Are you sure you want to cancel this departure declaration?
+confirmCancellation.heading = Are you sure you want to cancel this departure declaration?
+confirmCancellation.checkYourAnswersLabel = Are you sure you want to cancel this departure declaration?
+confirmCancellation.error.required = Select yes if you want to cancel this departure declaration
 
 pageNotFound.title = Page not found
 pageNotFound.heading = Page not found
@@ -141,3 +141,18 @@ pageNotFound.paragraph1 = If you typed the web address, check it is correct.
 pageNotFound.paragraph2 = If you pasted the web address, check you copied the entire address.
 pageNotFound.paragraph3Start = If the web address is correct or you selected a link or button,
 pageNotFound.contactLink=contact the New Computerised Transit System(NCTS) helpdesk if you need to speak to someone about your transit movement (opens in a new tab)
+
+cancellationReason.title = Why do you want to cancel this departure declaration?
+cancellationReason.heading = Why do you want to cancel this departure declaration?
+cancellationReason.checkYourAnswersLabel = Why do you want to cancel this departure declaration?
+cancellationReason.error.required = Enter the reason why you want to cancel this departure declaration
+cancellationReason.error.length = The reason why you want to cancel this departure declaration must be 350 characters or less
+cancellationReason.error.invalidCharacters = The reason why you want to cancel this departure declaration must only include letters a to z without accents, numbers 0 to 9, blank spaces, at signs (@), forward slashes, back slashes, full stops, commas, hyphens, and question marks
+
+cancellationSubmissionConfirmation.title = Cancellation request sent
+cancellationSubmissionConfirmation.heading = Cancellation request sent
+cancellationSubmissionConfirmation.para1 = for local reference number
+cancellationSubmissionConfirmation.subHeading = What happens next
+cancellationSubmissionConfirmation.para2 = You will get a decision on this request in a few minutes.
+cancellationSubmissionConfirmation.linkText = View departure declarations
+

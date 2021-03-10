@@ -26,7 +26,7 @@ class $className$ControllerSpec extends SpecBase with MockNunjucksRendererApp wi
 
       dataRetrievalWithData(emptyUserAnswers)
 
-      val request = FakeRequest(GET, routes.$className$Controller.onPageLoad(lrn).url)
+      val request = FakeRequest(GET, routes.$className$Controller.onPageLoad(departureId).url)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
 
@@ -36,7 +36,7 @@ class $className$ControllerSpec extends SpecBase with MockNunjucksRendererApp wi
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      val expectedJson = Json.obj("lrn" -> lrn)
+      val expectedJson = Json.obj("departureId" -> departureId)
 
       templateCaptor.getValue mustEqual "$className;format="decap"$.njk"
       jsonCaptor.getValue must containJson(expectedJson)

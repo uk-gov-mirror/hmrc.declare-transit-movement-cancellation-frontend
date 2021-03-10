@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package models
+import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
-import play.api.libs.json._
+package object connectors {
 
-final case class LocalReferenceNumber(value: String) {
-  override def toString: String = value
-}
 
-object LocalReferenceNumber {
-
-  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map (LocalReferenceNumber.apply)
-
-  implicit def writes: Writes[LocalReferenceNumber] = Writes {
-    lrn =>
-      JsString(lrn.value)
-  }
+  implicit val httpReads: HttpReads[HttpResponse] =
+    new HttpReads[HttpResponse] {
+      override def read(method: String, url: String, response: HttpResponse): HttpResponse =
+        response
+    }
 
 }

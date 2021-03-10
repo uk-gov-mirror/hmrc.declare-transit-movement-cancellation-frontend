@@ -17,14 +17,15 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
-import forms.ConfirmCancellationFormProvider
+import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
-import models.{NormalMode, UserAnswers}
+import models.NormalMode
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
-import pages.ConfirmCancellationPage
+import org.scalatestplus.mockito.MockitoSugar
+import pages.CancellationReasonPage
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
@@ -32,26 +33,26 @@ import play.api.mvc.Call
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.twirl.api.Html
-import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
+import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
 
-class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp with JsonMatchers {
+class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendererApp with MockitoSugar with NunjucksSupport with JsonMatchers  {
 
   def onwardRoute = Call("GET", "/foo")
 
-  private val formProvider = new ConfirmCancellationFormProvider()
+  private val formProvider = new CancellationReasonFormProvider()
   private val form = formProvider()
-  private val template = "confirmCancellation.njk"
+  private val template = "cancellationReason.njk"
 
-  lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(departureId).url
+  lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(departureId).url
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
+      .overrides(bind(classOf[Navigator])toInstance(new FakeNavigator(onwardRoute)))
 
-  "ConfirmCancellation Controller" - {
+  "CancellationReason Controller" - {
 
     "must return OK and the correct view for a GET" in {
 
@@ -60,7 +61,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       dataRetrievalWithData(emptyUserAnswers)
 
-      val request = FakeRequest(GET, confirmCancellationRoute)
+      val request = FakeRequest(GET, cancellationReasonRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
 
@@ -73,13 +74,13 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       val expectedJson = Json.obj(
         "form"   -> form,
         "mode"   -> NormalMode,
-        "departureId"    -> departureId,
-        "radios" -> Radios.yesNo(form("value"))
+        "departureId"    -> departureId
       )
 
+      val jsonWithoutConfig = jsonCaptor.getValue - configKey
 
       templateCaptor.getValue mustEqual template
-      jsonCaptor.getValue must containJson(expectedJson)
+      jsonWithoutConfig must containJson(expectedJson)
 
     }
 
@@ -88,10 +89,10 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers = UserAnswers(departureId, eoriNumber).set(ConfirmCancellationPage, true).success.value
+      val userAnswers = emptyUserAnswers.set(CancellationReasonPage, "answer").success.value
       dataRetrievalWithData(userAnswers)
 
-      val request = FakeRequest(GET, confirmCancellationRoute)
+      val request = FakeRequest(GET, cancellationReasonRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
 
@@ -101,43 +102,25 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      templateCaptor.getValue mustEqual template
+      val filledForm = form.bind(Map("value" -> "answer"))
 
+      templateCaptor.getValue mustEqual template
     }
 
-    "must redirect to the next page when valid data is submitted and user selects Yes" in {
+    "must redirect to the next page when valid data is submitted" in {
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       dataRetrievalWithData(emptyUserAnswers)
 
       val request =
-        FakeRequest(POST, confirmCancellationRoute)
-          .withFormUrlEncodedBody(("value", "true"))
+        FakeRequest(POST, cancellationReasonRoute)
+          .withFormUrlEncodedBody(("value", "answer"))
 
       val result = route(app, request).value
 
       status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual s"${controllers.routes.CancellationReasonController.onPageLoad(departureId)}"
-
-    }
-
-    "must redirect to the next page when valid data is submitted and user selects No" in {
-
-      when(mockSessionRepository.set(any())) thenReturn Future.successful(false)
-
-      dataRetrievalWithData(emptyUserAnswers)
-
-      val request =
-        FakeRequest(POST, confirmCancellationRoute)
-          .withFormUrlEncodedBody(("value", "false"))
-
-      val result = route(app, request).value
-
-      status(result) mustEqual SEE_OTHER
-
-      redirectLocation(result).value mustEqual s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
+      redirectLocation(result).value mustEqual s"${controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)}"
 
     }
 
@@ -148,7 +131,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       dataRetrievalWithData(emptyUserAnswers)
 
-      val request = FakeRequest(POST, confirmCancellationRoute).withFormUrlEncodedBody(("value", ""))
+      val request = FakeRequest(POST, cancellationReasonRoute).withFormUrlEncodedBody(("value", ""))
       val boundForm = form.bind(Map("value" -> ""))
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
       val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
@@ -160,18 +143,14 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> boundForm,
-        "mode"   -> NormalMode,
-        "departureId"    -> departureId,
-        "radios" -> Radios.yesNo(boundForm("value"))
+        "form" -> boundForm,
+        "departureId"  -> departureId,
+        "mode" -> NormalMode
       )
 
-      val jsonWithoutConfig = jsonCaptor.getValue - configKey
-
       templateCaptor.getValue mustEqual template
-      jsonWithoutConfig mustBe expectedJson
+      jsonCaptor.getValue must containJson(expectedJson)
 
     }
-
   }
 }

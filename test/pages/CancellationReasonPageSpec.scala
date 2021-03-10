@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package models
+package pages
 
-import play.api.libs.json._
+import pages.behaviours.PageBehaviours
 
-final case class LocalReferenceNumber(value: String) {
-  override def toString: String = value
-}
 
-object LocalReferenceNumber {
+class CancellationReasonPageSpec extends PageBehaviours {
 
-  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map (LocalReferenceNumber.apply)
+  "CancellationReasonPage" - {
 
-  implicit def writes: Writes[LocalReferenceNumber] = Writes {
-    lrn =>
-      JsString(lrn.value)
+    beRetrievable[String](CancellationReasonPage)
+
+    beSettable[String](CancellationReasonPage)
+
+    beRemovable[String](CancellationReasonPage)
   }
-
 }
