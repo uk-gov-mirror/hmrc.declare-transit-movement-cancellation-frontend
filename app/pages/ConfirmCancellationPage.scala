@@ -16,11 +16,12 @@
 
 package pages
 
+import models.DepartureId
 import play.api.libs.json.JsPath
 
-case object ConfirmCancellationPage extends QuestionPage[Boolean] {
+case class ConfirmCancellationPage(departureId: DepartureId) extends QuestionPage[Boolean] {
 
-  override def path: JsPath = JsPath \ toString
+  override def path: JsPath = JsPath  \ toString
 
   override def toString: String = "confirmCancellation"
 }

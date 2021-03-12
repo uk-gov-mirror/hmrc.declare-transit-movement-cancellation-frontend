@@ -16,21 +16,44 @@
 
 package navigation
 
+import controllers.routes
+import models._
+import pages.{ConfirmCancellationPage, _}
+import play.api.mvc.Call
 import javax.inject.{Inject, Singleton}
 
-import play.api.mvc.Call
-import controllers.routes
-import pages._
-import models._
 
 @Singleton
 class Navigator @Inject()() {
 
-  private val normalRoutes: Page => UserAnswers => Call = {
-    case _ => _ => routes.IndexController.onPageLoad()
+  protected def normalRoutes: PartialFunction[Page, UserAnswers => Option[Call]] = {
+    case ConfirmCancellationPage(departureId) => ua => confirmCancellationRoute(ua, departureId)
+    case CancellationReasonPage(departureId) => ua => Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
+    case CancellationSubmissionConfirmationPage(departureId) => ua => ???
+    case _ => ???
   }
 
-  def nextPage(page: Page,  userAnswers: UserAnswers): Call =
-      normalRoutes(page)(userAnswers)
+
+  private def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Option[Call] = {
+    ua.get(ConfirmCancellationPage(departureId)) match {
+      case Some(true) => Some(routes.CancellationReasonController.onPageLoad(departureId))
+      case Some(false) => Some(routes.CancellationReasonController.onPageLoad(departureId))
+    }
+
+  }
+
+  private def handleCall(userAnswers: UserAnswers, call: UserAnswers => Option[Call]) =
+    call(userAnswers) match {
+      case Some(onwardRoute) => onwardRoute
+      case None => routes.SessionExpiredController.onPageLoad()
+    }
+
+  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
+    case NormalMode =>
+      normalRoutes.lift(page) match {
+        case None => routes.IndexController.onPageLoad()
+        case Some(call) => handleCall(userAnswers, call)
+      }
+  }
 
 }

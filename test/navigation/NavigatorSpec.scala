@@ -17,6 +17,7 @@
 package navigation
 
 import base.SpecBase
+import config.FrontendAppConfig
 import controllers.routes
 import generators.Generators
 import pages._
@@ -24,9 +25,12 @@ import models._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
+import javax.inject.Inject
+
+class NavigatorSpec @Inject()(appConfig : FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   val navigator = new Navigator
+  val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
 
   "Navigator" - {
       "must go from a page that doesn't exist in the route map to Index" in {
@@ -38,6 +42,30 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
             navigator.nextPage(UnknownPage, answers)
               .mustBe(routes.IndexController.onPageLoad())
 
+      }
+    }
+    "Must go from AddSecurityConsignorEoriPage to SecurityConsignorEoriPage when user selects yes" in {
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          val updatedAnswers = answers
+            .set(ConfirmCancellationPage, true)
+            .success
+            .value
+          navigator
+            .nextPage(ConfirmCancellationPage, updatedAnswers)
+            .mustBe(viewDepartures)
+      }
+    }
+    "Must go from AddSecurityConsignorEoriPage to declaration view when user selects no" in {
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          val updatedAnswers = answers
+            .set(ConfirmCancellationPage, true)
+            .success
+            .value
+          navigator
+            .nextPage(ConfirmCancellationPage, updatedAnswers)
+            .mustBe(manageTransitMovementsViewDeparturesUrl)
       }
     }
   }
