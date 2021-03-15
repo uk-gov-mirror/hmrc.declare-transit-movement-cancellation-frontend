@@ -17,6 +17,7 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
+import config.FrontendAppConfig
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
 import models.NormalMode
@@ -50,7 +51,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator])toInstance(new FakeNavigator(onwardRoute)))
+      .overrides(bind(classOf[Navigator])toInstance new FakeNavigator()(onwardRoute))
 
   "CancellationReason Controller" - {
 
@@ -89,7 +90,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers = emptyUserAnswers.set(CancellationReasonPage, "answer").success.value
+      val userAnswers = emptyUserAnswers.set(CancellationReasonPage(departureId), "answer").success.value
       dataRetrievalWithData(userAnswers)
 
       val request = FakeRequest(GET, cancellationReasonRoute)

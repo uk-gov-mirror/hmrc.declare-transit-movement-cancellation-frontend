@@ -49,7 +49,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
+      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator()(onwardRoute)))
 
   "ConfirmCancellation Controller" - {
 
@@ -88,7 +88,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers = UserAnswers(departureId, eoriNumber).set(ConfirmCancellationPage, true).success.value
+      val userAnswers = UserAnswers(departureId, eoriNumber).set(ConfirmCancellationPage(departureId), true).success.value
       dataRetrievalWithData(userAnswers)
 
       val request = FakeRequest(GET, confirmCancellationRoute)

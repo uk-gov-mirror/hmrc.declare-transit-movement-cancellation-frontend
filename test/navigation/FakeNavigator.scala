@@ -16,12 +16,18 @@
 
 package navigation
 
-import play.api.mvc.Call
+import com.google.inject.Inject
+import config.FrontendAppConfig
+import models.UserAnswers
 import pages._
-import models.{Mode, NormalMode, UserAnswers}
+import play.api.mvc.Call
 
-class FakeNavigator(desiredRoute: Call) extends Navigator {
 
-  override def nextPage(page: Page, userAnswers: UserAnswers): Call =
-    desiredRoute
+class FakeNavigator @Inject()() (desiredRoute: Call) extends Navigator() {
+
+  override protected def normalRoutes(appConfig:FrontendAppConfig): PartialFunction[Page, UserAnswers => Option[Call]] = {
+    case _ =>
+      _ =>
+        Some(desiredRoute)
+  }
 }

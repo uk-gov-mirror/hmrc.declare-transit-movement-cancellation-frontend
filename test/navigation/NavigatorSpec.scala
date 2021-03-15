@@ -16,8 +16,10 @@
 
 package navigation
 
+import akka.http.scaladsl.util.FastFuture.successful
 import base.SpecBase
 import config.FrontendAppConfig
+import controllers.Assets.Redirect
 import controllers.routes
 import generators.Generators
 import pages._
@@ -26,10 +28,11 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import javax.inject.Inject
+import scala.concurrent.Future
 
 class NavigatorSpec @Inject()(appConfig : FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
-  val navigator = new Navigator
+  val navigator = new Navigator()
   val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
 
   "Navigator" - {
@@ -39,33 +42,33 @@ class NavigatorSpec @Inject()(appConfig : FrontendAppConfig) extends SpecBase wi
 
         forAll(arbitrary[UserAnswers]) {
           answers =>
-            navigator.nextPage(UnknownPage, answers)
+            navigator.nextPage(appConfig, UnknownPage,NormalMode,  answers)
               .mustBe(routes.IndexController.onPageLoad())
 
       }
     }
-    "Must go from AddSecurityConsignorEoriPage to SecurityConsignorEoriPage when user selects yes" in {
+    "Must go from ConfirmCancellationPAge to CancellationReason page when user selects yes" in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
           val updatedAnswers = answers
-            .set(ConfirmCancellationPage, true)
+            .set(ConfirmCancellationPage(departureId), true)
             .success
             .value
           navigator
-            .nextPage(ConfirmCancellationPage, updatedAnswers)
+            .nextPage(appConfig, ConfirmCancellationPage(departureId), NormalMode,  updatedAnswers)
             .mustBe(viewDepartures)
       }
     }
-    "Must go from AddSecurityConsignorEoriPage to declaration view when user selects no" in {
+    "Must go from ConfirmCancellationPAge to declaration view when user selects no" in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
           val updatedAnswers = answers
-            .set(ConfirmCancellationPage, true)
+            .set(ConfirmCancellationPage(departureId), true)
             .success
             .value
           navigator
-            .nextPage(ConfirmCancellationPage, updatedAnswers)
-            .mustBe(manageTransitMovementsViewDeparturesUrl)
+            .nextPage(appConfig, ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
+            .mustBe (Future.successful(Redirect(viewDepartures)))
       }
     }
   }

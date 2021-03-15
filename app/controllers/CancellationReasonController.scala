@@ -19,8 +19,7 @@ package controllers
 import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
-import models.{DepartureId, LocalReferenceNumber, Mode}
-import pages.CancellationReasonPage
+import models.{DepartureId, Mode}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
