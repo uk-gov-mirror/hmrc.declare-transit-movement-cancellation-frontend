@@ -24,18 +24,19 @@ import pages.{ConfirmCancellationPage, _}
 import play.api.mvc.Call
 
 @Singleton
-class Navigator @Inject()() {
+class Navigator @Inject()(appConfig: FrontendAppConfig) {
 
-  protected def normalRoutes(appConfig:FrontendAppConfig): PartialFunction[Page, UserAnswers => Option[Call]] = {
+  protected def normalRoutes: PartialFunction[Page, UserAnswers => Option[Call]] = {
 
-    case ConfirmCancellationPage(departureId) => ua =>
-      Some(confirmCancellationRoute(appConfig, ua,  departureId))
-    case CancellationReasonPage(departureId) => ua =>  Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
-    case CancellationSubmissionConfirmationPage(departureId) => ???
-    case _ => ???
+    case ConfirmCancellationPage(departureId) => ua => Some(confirmCancellationRoute(ua,  departureId))
+    case CancellationReasonPage(departureId)  => ua =>  Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
+    case CancellationSubmissionConfirmationPage(departureId) => ua =>
+      val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+      Some(Call("GET",viewDepartures))
+
   }
 
-   def confirmCancellationRoute(appConfig:FrontendAppConfig,ua: UserAnswers, departureId: DepartureId): Call = {
+   def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Call = {
 
      ua.get(ConfirmCancellationPage(departureId)) match {
        case Some(true) => routes.CancellationReasonController.onPageLoad(departureId)
@@ -51,9 +52,9 @@ class Navigator @Inject()() {
       case None => routes.SessionExpiredController.onPageLoad()
     }
 
-  def nextPage(appConfig:FrontendAppConfig, page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
+  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
     case NormalMode =>
-      normalRoutes(appConfig).lift(page) match {
+      normalRoutes.lift(page) match {
         case None => routes.IndexController.onPageLoad()
         case Some(call) => handleCall(userAnswers, call)
       }

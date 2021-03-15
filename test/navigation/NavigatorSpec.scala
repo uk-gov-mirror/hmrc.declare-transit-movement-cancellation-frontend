@@ -16,38 +16,40 @@
 
 package navigation
 
-import akka.http.scaladsl.util.FastFuture.successful
 import base.SpecBase
+import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.Assets.Redirect
 import controllers.routes
 import generators.Generators
-import pages._
 import models._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import pages._
 
-import javax.inject.Inject
 import scala.concurrent.Future
 
-class NavigatorSpec @Inject()(appConfig : FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators {
+class NavigatorSpec @Inject()(appConfig: FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators  {
 
-  val navigator = new Navigator()
-  val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+  private val navigator: Navigator = new Navigator(appConfig: FrontendAppConfig)()
+
+  private val viewDepartures: String = s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
+
 
   "Navigator" - {
-      "must go from a page that doesn't exist in the route map to Index" in {
+    "must go from a page that doesn't exist in the route map to Index" in {
 
-        case object UnknownPage extends Page
+      case object UnknownPage extends Page
 
-        forAll(arbitrary[UserAnswers]) {
-          answers =>
-            navigator.nextPage(appConfig, UnknownPage,NormalMode,  answers)
-              .mustBe(routes.IndexController.onPageLoad())
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          navigator
+            .nextPage(UnknownPage,NormalMode,  answers)
+            .mustBe(routes.IndexController.onPageLoad())
 
       }
     }
-    "Must go from ConfirmCancellationPAge to CancellationReason page when user selects yes" in {
+    "Must go from ConfirmCancellationPage to CancellationReason page when user selects yes" in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
           val updatedAnswers = answers
@@ -55,20 +57,33 @@ class NavigatorSpec @Inject()(appConfig : FrontendAppConfig) extends SpecBase wi
             .success
             .value
           navigator
-            .nextPage(appConfig, ConfirmCancellationPage(departureId), NormalMode,  updatedAnswers)
-            .mustBe(viewDepartures)
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode,  updatedAnswers)
+            .mustBe(routes.CancellationReasonController.onPageLoad(departureId))
       }
     }
-    "Must go from ConfirmCancellationPAge to declaration view when user selects no" in {
+    "Must go from ConfirmCancellationPage to Declaration view when user selects no" in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
           val updatedAnswers = answers
-            .set(ConfirmCancellationPage(departureId), true)
+            .set(ConfirmCancellationPage(departureId), false)
             .success
             .value
           navigator
-            .nextPage(appConfig, ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
             .mustBe (Future.successful(Redirect(viewDepartures)))
+      }
+    }
+
+    "Must go from CancellationReason page to Confirmation page view when user selects no" in {
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          val updatedAnswers = answers
+            .set(CancellationReasonPage(departureId), "Test reason")
+            .success
+            .value
+          navigator
+            .nextPage(CancellationReasonPage(departureId), NormalMode, updatedAnswers)
+            .mustBe (routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
       }
     }
   }

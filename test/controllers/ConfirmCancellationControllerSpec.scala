@@ -17,6 +17,7 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
+import config.FrontendAppConfig
 import forms.ConfirmCancellationFormProvider
 import matchers.JsonMatchers
 import models.{NormalMode, UserAnswers}
@@ -49,7 +50,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator()(onwardRoute)))
+      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
 
   "ConfirmCancellation Controller" - {
 

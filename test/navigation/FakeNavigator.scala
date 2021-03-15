@@ -23,9 +23,9 @@ import pages._
 import play.api.mvc.Call
 
 
-class FakeNavigator @Inject()() (desiredRoute: Call) extends Navigator() {
+class FakeNavigator @Inject()(appConfig: FrontendAppConfig) (desiredRoute: Call) extends Navigator(appConfig: FrontendAppConfig)() {
 
-  override protected def normalRoutes(appConfig:FrontendAppConfig): PartialFunction[Page, UserAnswers => Option[Call]] = {
+  override protected def normalRoutes: PartialFunction[Page, UserAnswers => Option[Call]] = {
     case _ =>
       _ =>
         Some(desiredRoute)
