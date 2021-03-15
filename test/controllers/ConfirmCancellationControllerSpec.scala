@@ -47,12 +47,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
   lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(departureId).url
 
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
-
-  "ConfirmCancellation Controller" - {
+    "ConfirmCancellation Controller" - {
 
     "must return OK and the correct view for a GET" in {
 

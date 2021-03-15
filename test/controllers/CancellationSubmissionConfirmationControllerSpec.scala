@@ -47,12 +47,6 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
     )
   }
 
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator()(onwardRoute)))
-
-
   "CancellationSubmissionConfirmation Controller" - {
 
     "return OK and the correct view for a GET" in {

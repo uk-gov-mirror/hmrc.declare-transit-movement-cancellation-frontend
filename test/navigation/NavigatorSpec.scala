@@ -29,10 +29,9 @@ import pages._
 
 import scala.concurrent.Future
 
-class NavigatorSpec @Inject()(appConfig: FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators  {
+class NavigatorSpec @Inject()(val appConfig: FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators  {
 
-  private val navigator: Navigator = new Navigator(appConfig: FrontendAppConfig)()
-
+  private val navigator: Navigator = new Navigator(appConfig:FrontendAppConfig)
   private val viewDepartures: String = s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
 
 
