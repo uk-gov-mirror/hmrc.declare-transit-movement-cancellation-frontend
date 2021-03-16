@@ -40,6 +40,7 @@ class CancellationReasonController @Inject()(
                                        requireData: DataRequiredAction,
                                        formProvider: CancellationReasonFormProvider,
                                        appConfig: FrontendAppConfig,
+                                       checkCancellationStatus: CheckCancellationStatusProvider,
                                        val controllerComponents: MessagesControllerComponents,
                                        renderer: Renderer
 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
@@ -47,7 +48,7 @@ class CancellationReasonController @Inject()(
   private val form = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
     implicit request =>
 
       val json = Json.obj(
@@ -60,7 +61,7 @@ class CancellationReasonController @Inject()(
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
 
     implicit request =>
     val cancellationSubmission  = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)

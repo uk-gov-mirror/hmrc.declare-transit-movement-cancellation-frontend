@@ -16,8 +16,7 @@
 
 package models.requests
 
-import models.EoriNumber
+import models.DepartureId
 import play.api.mvc.{Request, WrappedRequest}
 
-case class IdentifierRequest[A] (request: Request[A], eoriNumber: EoriNumber) extends WrappedRequest[A](request)
-
+//case class StatusRequest[A](request: Request[A], depatureId: DepartureId) extends WrappedRequest[A](request)

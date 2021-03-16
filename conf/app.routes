@@ -21,3 +21,7 @@ GET        /:departureId/cancellation-reason                        controllers.
 POST       /:departureId/cancellation-reason                        controllers.CancellationReasonController.onSubmit(departureId: DepartureId, mode: Mode = NormalMode)
 
 GET        /:departureId/cancellation-submission-confirmation                       controllers.CancellationSubmissionConfirmationController.onPageLoad(departureId: DepartureId)
+
+GET        /can-not-cancel                       controllers.CanNotCancelController.onPageLoad
+
+GET        /:departureId/departureNotFound                       controllers.DepartureNotFoundController.onPageLoad(departureId: DepartureId)
