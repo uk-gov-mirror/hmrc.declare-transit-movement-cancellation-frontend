@@ -16,25 +16,29 @@
 
 package controllers.actions
 import connectors.DepartureMovementConnector
-import controllers.routes
 import models.DepartureId
-import models.requests.{IdentifierRequest}
+import models.requests.IdentifierRequest
 import models.response.ResponseDeparture
-import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionFilter, Result}
+import play.api.libs.json.{__, Json}
+import play.api.mvc.Results._
+import play.api.mvc.{ActionFilter, RequestHeader, Result}
+import play.twirl.api.Html
+import renderer.Renderer
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.parsing.json.JSONObject
 
-class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector)(implicit ec: ExecutionContext) {
-  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector)
+class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector, renderer: Renderer)(implicit ec: ExecutionContext) {
+  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector, renderer)
 
 }
 
 class CancellationStatusAction(
   departureId: DepartureId,
-  departureMovementConnector: DepartureMovementConnector
+  departureMovementConnector: DepartureMovementConnector,
+  renderer: Renderer
 )(implicit protected val executionContext: ExecutionContext)
     extends ActionFilter[IdentifierRequest] {
 
@@ -45,14 +49,18 @@ class CancellationStatusAction(
 
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
-      case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) =>
-        Future.successful(Option(Redirect(routes.CanNotCancelController.onPageLoad())));
+      case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) => {
+
+        renderer.render("canNotCancel.njk", Json.obj())(request).map(html => Option(BadRequest(html)))
+      }
 
       case Some(responseDeparture: ResponseDeparture) if (validStatus.contains(responseDeparture.status)) =>
-        Future.successful(None);
+        Future.successful(None)
 
-      case None =>
-        Future.successful(Option(Redirect(routes.DepartureNotFoundController.onPageLoad(departureId))));
+      case None => {
+        Future.successful(Option(NotFound("")))
+      }
+
     }
   }
 }

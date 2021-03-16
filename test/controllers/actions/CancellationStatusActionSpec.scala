@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import base.SpecBase
+import base.{MockNunjucksRendererApp, SpecBase}
 import connectors.DepartureMovementConnector
 import models.requests.IdentifierRequest
 import models.response.ResponseDeparture
@@ -26,18 +26,21 @@ import org.mockito.Mockito
 import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfterEach
 import play.api.mvc.Results._
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, Request, Result}
+import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.twirl.api.Html
+import renderer.Renderer
+import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach {
+class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with MockNunjucksRendererApp with NunjucksSupport {
 
-  implicit lazy val Action: ActionBuilder[Request, AnyContent] = app.injector.instanceOf(classOf[DefaultActionBuilder])
+  val mockConnector: DepartureMovementConnector = mock[DepartureMovementConnector]
 
-  val mockConnector = mock[DepartureMovementConnector]
+  val renderer: Renderer = app.injector.instanceOf[Renderer]
 
   override def beforeEach: Unit = {
     super.beforeEach
@@ -56,17 +59,66 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach {
         )
       }
 
+      when(mockRenderer.render(any(), any())(any()))
+        .thenReturn(Future.successful(Html("")))
+
       when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(Some(mockDepartureResponse)))
 
-      val sut = (new CheckCancellationStatusProvider(mockConnector)(implicitly))(DepartureId(1))
+      val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer)(implicitly))(DepartureId(1))
 
       val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
 
-      val result: Future[Result] = sut.invokeBlock(testRequest, fakeOkResult)
+      val result: Future[Result] = checkCancellationStatusProvider.invokeBlock(testRequest, fakeOkResult)
 
       status(result) mustEqual OK
       contentAsString(result) mustEqual "fake ok result value"
     }
+  }
+
+  "will get a 400 and will load the cannot cancel page when the departure status is invalid" in {
+    val mockDepartureResponse: ResponseDeparture = {
+      ResponseDeparture(
+        LocalReferenceNumber("lrn"),
+        "InvalidStatus"
+      )
+    }
+
+    when(mockRenderer.render(any(), any())(any()))
+      .thenReturn(Future.successful(Html("")))
+
+    when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(Some(mockDepartureResponse)))
+
+    val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer)(implicitly))(DepartureId(1))
+
+    val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
+
+    val result: Future[Result] = checkCancellationStatusProvider.invokeBlock(testRequest, fakeOkResult)
+
+    status(result) mustEqual BAD_REQUEST
+    contentAsString(result) must not be("fake ok result value")
+  }
+
+  "will get a 404 and will load the departure not found page when the departure record is not found" in {
+    val mockDepartureResponse: ResponseDeparture = {
+      ResponseDeparture(
+        LocalReferenceNumber("lrn"),
+        "InvalidStatus"
+      )
+    }
+
+    when(mockRenderer.render(any(), any())(any()))
+      .thenReturn(Future.successful(Html("")))
+
+    when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(None))
+
+    val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer)(implicitly))(DepartureId(1))
+
+    val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
+
+    val result: Future[Result] = checkCancellationStatusProvider.invokeBlock(testRequest, fakeOkResult)
+
+    status(result) mustEqual NOT_FOUND
+    contentAsString(result) must not be("fake ok result value")
   }
 
 }
