@@ -32,12 +32,9 @@ class Navigator @Inject()(val config: FrontendAppConfig) {
 
     case ConfirmCancellationPage(departureId) => ua => Some(confirmCancellationRoute(ua,  departureId))
     case CancellationReasonPage(departureId)  => ua =>  Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
-
-
   }
 
    def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Call = {
-
      ua.get(ConfirmCancellationPage(departureId)) match {
        case Some(true) => routes.CancellationReasonController.onPageLoad(departureId)
        case Some(false) => Call("GET",viewDepartures)

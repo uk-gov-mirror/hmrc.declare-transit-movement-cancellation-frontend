@@ -18,7 +18,6 @@ package controllers
 
 import com.google.inject.Inject
 import config.FrontendAppConfig
-import play.api.Configuration
 import play.api.i18n.Lang
 import play.api.mvc._
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}

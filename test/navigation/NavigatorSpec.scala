@@ -25,6 +25,7 @@ import models._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages._
+import play.api.mvc.Call
 
 class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generators  {
 
@@ -68,7 +69,7 @@ class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generat
             .value
           navigator
             .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
-            .mustBe (Redirect(viewDepartures))
+            .mustBe (viewDepartures)
       }
     }
 
