@@ -36,10 +36,10 @@ import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
 
-class CheckCancellationStatusSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp {
+class CancellationStatusActionSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp {
 
 //  implicit lazy val materializer: Materializer = app.materializer
-  implicit lazy val Action                     = app.injector.instanceOf(classOf[DefaultActionBuilder])
+  implicit lazy val Action = app.injector.instanceOf(classOf[DefaultActionBuilder])
 
   private val mockDepartureResponse: ResponseDeparture = {
     ResponseDeparture(
@@ -56,7 +56,6 @@ class CheckCancellationStatusSpec extends SpecBase with NunjucksSupport with Moc
         .thenReturn(Future.successful(Html("")))
       when(mockConnector.getDeparture(any())(any()))
         .thenReturn(Future.successful(Some(mockDepartureResponse)))
-
 
     }
   }
