@@ -18,14 +18,12 @@ package navigation
 
 import base.SpecBase
 import config.FrontendAppConfig
-import controllers.Assets.Redirect
 import controllers.routes
 import generators.Generators
 import models._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages._
-import play.api.mvc.Call
 
 class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generators  {
 
@@ -68,7 +66,7 @@ class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generat
             .success
             .value
           navigator
-            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers).url
             .mustBe (viewDepartures)
       }
     }

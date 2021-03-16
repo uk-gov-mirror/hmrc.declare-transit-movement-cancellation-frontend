@@ -26,7 +26,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import repositories.SessionRepository
-import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
@@ -47,7 +47,7 @@ class CancellationReasonController @Inject()(
   private val form = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
     implicit request =>
 
       val json = Json.obj(

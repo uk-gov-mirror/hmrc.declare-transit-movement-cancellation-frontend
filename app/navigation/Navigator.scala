@@ -24,10 +24,9 @@ import pages.{ConfirmCancellationPage, _}
 import play.api.mvc.Call
 
 @Singleton
-class Navigator @Inject()(val config: FrontendAppConfig) {
+class Navigator @Inject()(val appConfig: FrontendAppConfig) {
 
-  private val viewDepartures = s"${config.manageTransitMovementsViewDeparturesUrl}"
-
+  private val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
   protected def normalRoutes: PartialFunction[Page, UserAnswers => Option[Call]] = {
 
     case ConfirmCancellationPage(departureId) => ua => Some(confirmCancellationRoute(ua,  departureId))
@@ -37,7 +36,7 @@ class Navigator @Inject()(val config: FrontendAppConfig) {
    def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Call = {
      ua.get(ConfirmCancellationPage(departureId)) match {
        case Some(true) => routes.CancellationReasonController.onPageLoad(departureId)
-       case Some(false) => Call("GET",viewDepartures)
+       case Some(false) => Call("GET", viewDepartures)
     }
   }
 

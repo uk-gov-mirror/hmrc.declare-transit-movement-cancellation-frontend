@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
-import models.{DepartureId, Mode}
+import models.{DepartureId, Mode, UserAnswers}
 import navigation.Navigator
 import pages.ConfirmCancellationPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -28,6 +28,7 @@ import renderer.Renderer
 import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,7 +37,7 @@ class ConfirmCancellationController @Inject()(
                                                identify: IdentifierAction,
                                                formProvider: ConfirmCancellationFormProvider,
                                                sessionRepository: SessionRepository,
-                                               navigator:Navigator,
+                                               navigator: Navigator,
                                                getData: DataRetrievalActionProvider,
                                                requireData: DataRequiredAction,
                                                val controllerComponents: MessagesControllerComponents,
@@ -54,13 +55,12 @@ class ConfirmCancellationController @Inject()(
         "mode" -> mode,
         "departureId" -> departureId,
         "radios" -> Radios.yesNo(form("value")),
-        "onSubmitUrl" -> controllers.routes.ConfirmCancellationController.onSubmit(departureId).url
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId)).async {
     implicit request =>
       form.bindFromRequest().fold(
         formWithErrors => {
@@ -73,13 +73,18 @@ class ConfirmCancellationController @Inject()(
           )
           renderer.render(template, json).map(BadRequest(_))
         },
-          value =>
-            for {
-              updatedAnswers <- Future.fromTry(request.userAnswers.set(ConfirmCancellationPage(departureId), value))
-              _              <- sessionRepository.set(updatedAnswers)
+        value => {
+          val userAnswers = request.userAnswers match {
+            case Some(value) => value
+            case None => UserAnswers(departureId, request.eoriNumber)
+          }
+          for {
+            updatedAnswers <- Future.fromTry(userAnswers.set(ConfirmCancellationPage(departureId), value))
+            _ <- sessionRepository.set(updatedAnswers)
 
-            } yield Redirect(navigator.nextPage(ConfirmCancellationPage(departureId), mode, updatedAnswers))
-
+          } yield Redirect(navigator.nextPage(ConfirmCancellationPage(departureId), mode, updatedAnswers))
+        }
       )
+
   }
 }
