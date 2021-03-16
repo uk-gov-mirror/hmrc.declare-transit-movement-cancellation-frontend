@@ -27,21 +27,19 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
-class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector)
-                                               (implicit ec: ExecutionContext) {
-  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, ec, departureMovementConnector)
+class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector)(implicit ec: ExecutionContext) {
+  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector)
 
 }
 
-
 class CancellationStatusAction(
   departureId: DepartureId,
-  implicit protected val executionContext: ExecutionContext,
   departureMovementConnector: DepartureMovementConnector
-) extends ActionFilter[IdentifierRequest] {
+)(implicit protected val executionContext: ExecutionContext)
+    extends ActionFilter[IdentifierRequest] {
 
- final val validStatus: Seq[String] = Seq("DepartureSubmitted", "MrnAllocated", "PositiveAcknowledgement");
+  // TODO: Refactor
+  final val validStatus: Seq[String] = Seq("DepartureSubmitted", "MrnAllocated", "PositiveAcknowledgement");
 
   override protected def filter[A](request: IdentifierRequest[A]): Future[Option[Result]] = {
 
@@ -49,8 +47,10 @@ class CancellationStatusAction(
     departureMovementConnector.getDeparture(departureId).flatMap {
       case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) =>
         Future.successful(Option(Redirect(routes.CanNotCancelController.onPageLoad())));
+
       case Some(responseDeparture: ResponseDeparture) if (validStatus.contains(responseDeparture.status)) =>
         Future.successful(None);
+
       case None =>
         Future.successful(Option(Redirect(routes.DepartureNotFoundController.onPageLoad(departureId))));
     }

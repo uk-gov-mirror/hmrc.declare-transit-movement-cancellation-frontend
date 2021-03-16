@@ -16,47 +16,56 @@
 
 package controllers.actions
 
-import akka.stream.Materializer
-import base.{MockNunjucksRendererApp, SpecBase}
+import base.SpecBase
 import connectors.DepartureMovementConnector
-import controllers.routes
-import models.LocalReferenceNumber
+import models.requests.IdentifierRequest
 import models.response.ResponseDeparture
-import navigation.{FakeNavigator, Navigator}
+import models.{DepartureId, EoriNumber, LocalReferenceNumber}
 import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito
 import org.mockito.Mockito.when
-import play.api.Application
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{Call, DefaultActionBuilder}
+import org.scalatest.BeforeAndAfterEach
+import play.api.mvc.Results._
+import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.twirl.api.Html
-import uk.gov.hmrc.viewmodels.NunjucksSupport
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CancellationStatusActionSpec extends SpecBase with NunjucksSupport with MockNunjucksRendererApp {
+class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach {
 
-//  implicit lazy val materializer: Materializer = app.materializer
-  implicit lazy val Action = app.injector.instanceOf(classOf[DefaultActionBuilder])
+  implicit lazy val Action: ActionBuilder[Request, AnyContent] = app.injector.instanceOf(classOf[DefaultActionBuilder])
 
-  private val mockDepartureResponse: ResponseDeparture = {
-    ResponseDeparture(
-      LocalReferenceNumber("lrn"),
-      "DepartureSubmitted"
-    )
+  val mockConnector = mock[DepartureMovementConnector]
+
+  override def beforeEach: Unit = {
+    super.beforeEach
+    Mockito.reset(mockConnector)
   }
 
+  private def fakeOkResult[A]: A => Future[Result] =
+    a => Future.successful(Ok("fake ok result value"))
+
   "a check cancellation status action" - {
+    "will get a 200 and will load the correct page when the departure status is DepartureSubmitted" in {
+      val mockDepartureResponse: ResponseDeparture = {
+        ResponseDeparture(
+          LocalReferenceNumber("lrn"),
+          "DepartureSubmitted"
+        )
+      }
 
-    "load the correct view for correct status" in {
+      when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(Some(mockDepartureResponse)))
 
-      when(mockRenderer.render(any(), any())(any()))
-        .thenReturn(Future.successful(Html("")))
-      when(mockConnector.getDeparture(any())(any()))
-        .thenReturn(Future.successful(Some(mockDepartureResponse)))
+      val sut = (new CheckCancellationStatusProvider(mockConnector)(implicitly))(DepartureId(1))
 
+      val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
+
+      val result: Future[Result] = sut.invokeBlock(testRequest, fakeOkResult)
+
+      status(result) mustEqual OK
+      contentAsString(result) mustEqual "fake ok result value"
     }
   }
 
