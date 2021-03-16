@@ -17,6 +17,7 @@
 package connectors
 
 import config.FrontendAppConfig
+import logging.Logging
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import models.DepartureId
 import models.response.ResponseDeparture
@@ -31,10 +32,9 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) {
+class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) extends Logging {
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
-  val logger: Logger          = Logger(getClass)
   private val channel: String = "web"
 
   def getDeparture(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[Option[ResponseDeparture]] = {
