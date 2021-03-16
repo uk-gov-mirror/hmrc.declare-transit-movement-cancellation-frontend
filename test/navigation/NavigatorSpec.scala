@@ -17,7 +17,6 @@
 package navigation
 
 import base.SpecBase
-import com.google.inject.Inject
 import config.FrontendAppConfig
 import controllers.Assets.Redirect
 import controllers.routes
@@ -27,13 +26,12 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages._
 
-import scala.concurrent.Future
+class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generators  {
 
-class NavigatorSpec @Inject()(val appConfig: FrontendAppConfig) extends SpecBase with ScalaCheckPropertyChecks with Generators  {
+  val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
-  private val navigator: Navigator = new Navigator(appConfig:FrontendAppConfig)
+  private val navigator: Navigator = new Navigator(appConfig)
   private val viewDepartures: String = s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
-
 
   "Navigator" - {
     "must go from a page that doesn't exist in the route map to Index" in {
@@ -60,6 +58,7 @@ class NavigatorSpec @Inject()(val appConfig: FrontendAppConfig) extends SpecBase
             .mustBe(routes.CancellationReasonController.onPageLoad(departureId))
       }
     }
+
     "Must go from ConfirmCancellationPage to Declaration view when user selects no" in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
@@ -69,11 +68,11 @@ class NavigatorSpec @Inject()(val appConfig: FrontendAppConfig) extends SpecBase
             .value
           navigator
             .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
-            .mustBe (Future.successful(Redirect(viewDepartures)))
+            .mustBe (Redirect(viewDepartures))
       }
     }
 
-    "Must go from CancellationReason page to Confirmation page view when user selects no" in {
+    "Must go from CancellationReason page to Confirmation page " in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
           val updatedAnswers = answers

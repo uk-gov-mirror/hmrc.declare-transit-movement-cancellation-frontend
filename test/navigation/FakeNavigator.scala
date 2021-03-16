@@ -17,14 +17,13 @@
 package navigation
 
 import com.google.inject.Inject
-import config.FrontendAppConfig
 import models.UserAnswers
 import pages.Page
 import play.api.Mode
 import play.api.mvc.Call
 
 
-class FakeNavigator @Inject()(config: FrontendAppConfig)(desiredRoute: Call)  {
+class FakeNavigator @Inject()()(desiredRoute: Call)  {
 
       def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
        desiredRoute

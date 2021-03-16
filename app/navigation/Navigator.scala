@@ -40,8 +40,7 @@ class Navigator @Inject()(val config: FrontendAppConfig) {
 
      ua.get(ConfirmCancellationPage(departureId)) match {
        case Some(true) => routes.CancellationReasonController.onPageLoad(departureId)
-       case Some(false) =>
-       Call("GET",viewDepartures)
+       case Some(false) => Call("GET",viewDepartures)
     }
   }
 
