@@ -20,6 +20,8 @@ import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
 import models.{DepartureId, Mode}
+import navigation.Navigator
+import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -37,8 +39,8 @@ class CancellationReasonController @Inject()(
                                        identify: IdentifierAction,
                                        getData: DataRetrievalActionProvider,
                                        requireData: DataRequiredAction,
+                                       navigator:Navigator,
                                        formProvider: CancellationReasonFormProvider,
-                                       appConfig: FrontendAppConfig,
                                        val controllerComponents: MessagesControllerComponents,
                                        renderer: Renderer
 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
@@ -46,7 +48,7 @@ class CancellationReasonController @Inject()(
   private val form = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
     implicit request =>
 
       val json = Json.obj(
@@ -55,29 +57,26 @@ class CancellationReasonController @Inject()(
         "mode" -> mode,
         "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
       )
-
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
 
     implicit request =>
-    val cancellationSubmission  = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)
-
       form.bindFromRequest().fold(
         formWithErrors => {
-
           val json = Json.obj(
             "form" -> formWithErrors,
             "departureId"  -> departureId,
             "mode" -> mode
           )
-
           renderer.render(template, json).map(BadRequest(_))
-
         },
-         value =>
-          Future.successful(Redirect(cancellationSubmission))
+        value =>
+          for {
+            updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage(departureId), value))
+            _              <- sessionRepository.set(updatedAnswers)
+          } yield Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers))
         //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
       )
   }

@@ -28,7 +28,7 @@ import renderer.Renderer
 import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
 
 import javax.inject.Inject
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 class CancellationSubmissionConfirmationController @Inject()(
                                                               override val messagesApi: MessagesApi,
