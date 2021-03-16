@@ -18,15 +18,12 @@ package connectors
 
 import config.FrontendAppConfig
 import logging.Logging
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import models.DepartureId
 import models.response.ResponseDeparture
-import play.api.Logger
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}

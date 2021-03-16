@@ -17,17 +17,13 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
-import config.FrontendAppConfig
 import forms.ConfirmCancellationFormProvider
 import matchers.JsonMatchers
 import models.{NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{times, verify, when}
 import pages.ConfirmCancellationPage
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
