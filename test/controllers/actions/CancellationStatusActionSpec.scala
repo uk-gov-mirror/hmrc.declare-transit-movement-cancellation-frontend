@@ -22,9 +22,10 @@ import models.requests.IdentifierRequest
 import models.response.ResponseDeparture
 import models.{DepartureId, EoriNumber, LocalReferenceNumber}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
-import org.mockito.Mockito.when
+import org.mockito.{ArgumentCaptor, Mockito}
+import org.mockito.Mockito.{times, verify, when}
 import org.scalatest.BeforeAndAfterEach
+import play.api.libs.json.JsObject
 import play.api.mvc.Results._
 import play.api.mvc._
 import play.api.test.FakeRequest
@@ -92,10 +93,15 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
 
     val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
 
+    val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+    val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+
     val result: Future[Result] = checkCancellationStatusProvider.invokeBlock(testRequest, fakeOkResult)
 
     status(result) mustEqual BAD_REQUEST
-    contentAsString(result) must not be("fake ok result value")
+    verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+    contentAsString(result) must not be ("fake ok result value")
+    templateCaptor.getValue mustEqual "canNotCancel.njk"
   }
 
   "will get a 404 and will load the departure not found page when the departure record is not found" in {
@@ -115,10 +121,15 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
 
     val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
 
+    val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+    val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+
     val result: Future[Result] = checkCancellationStatusProvider.invokeBlock(testRequest, fakeOkResult)
 
     status(result) mustEqual NOT_FOUND
-    contentAsString(result) must not be("fake ok result value")
+    verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+    contentAsString(result) must not be ("fake ok result value")
+    templateCaptor.getValue mustEqual "departureNotFound.njk"
   }
 
 }

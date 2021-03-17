@@ -19,16 +19,14 @@ import connectors.DepartureMovementConnector
 import models.DepartureId
 import models.requests.IdentifierRequest
 import models.response.ResponseDeparture
-import play.api.libs.json.{__, Json}
+import play.api.libs.json.Json
 import play.api.mvc.Results._
-import play.api.mvc.{ActionFilter, RequestHeader, Result}
-import play.twirl.api.Html
+import play.api.mvc.{ActionFilter, Result}
 import renderer.Renderer
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.parsing.json.JSONObject
 
 class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector, renderer: Renderer)(implicit ec: ExecutionContext) {
   def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector, renderer)
@@ -42,7 +40,6 @@ class CancellationStatusAction(
 )(implicit protected val executionContext: ExecutionContext)
     extends ActionFilter[IdentifierRequest] {
 
-  // TODO: Refactor
   final val validStatus: Seq[String] = Seq("DepartureSubmitted", "MrnAllocated", "PositiveAcknowledgement");
 
   override protected def filter[A](request: IdentifierRequest[A]): Future[Option[Result]] = {
@@ -50,7 +47,6 @@ class CancellationStatusAction(
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
       case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) => {
-
         renderer.render("canNotCancel.njk", Json.obj())(request).map(html => Option(BadRequest(html)))
       }
 
@@ -58,7 +54,7 @@ class CancellationStatusAction(
         Future.successful(None)
 
       case None => {
-        Future.successful(Option(NotFound("")))
+        renderer.render("departureNotFound.njk", Json.obj())(request).map(html => Option(NotFound(html)))
       }
 
     }

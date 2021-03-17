@@ -17,9 +17,11 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
+import connectors.DepartureMovementConnector
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
-import models.NormalMode
+import models.response.ResponseDeparture
+import models.{LocalReferenceNumber, NormalMode}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
@@ -47,6 +49,15 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
   lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(departureId).url
 
+  val mockConnector: DepartureMovementConnector = mock[DepartureMovementConnector]
+
+  val mockDepartureResponse: ResponseDeparture = {
+    ResponseDeparture(
+      LocalReferenceNumber("lrn"),
+      "DepartureSubmitted"
+    )
+  }
+
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
@@ -55,6 +66,11 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
   "CancellationReason Controller" - {
 
     "must return OK and the correct view for a GET" in {
+
+      checkCancellationStatus()
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
@@ -86,6 +102,11 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
+      checkCancellationStatus()
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
+
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
@@ -109,6 +130,11 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
     "must redirect to the next page when valid data is submitted" in {
 
+      checkCancellationStatus()
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
+
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
       dataRetrievalWithData(emptyUserAnswers)
@@ -125,6 +151,11 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
+
+      checkCancellationStatus()
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))

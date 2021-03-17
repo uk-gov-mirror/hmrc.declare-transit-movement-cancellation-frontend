@@ -22,6 +22,3 @@ POST       /:departureId/cancellation-reason                        controllers.
 
 GET        /:departureId/cancellation-submission-confirmation       controllers.CancellationSubmissionConfirmationController.onPageLoad(departureId: DepartureId)
 
-GET        /cannot-cancel                                           controllers.CanNotCancelController.onPageLoad
-
-GET        /:departureId/departure-not-found                        controllers.DepartureNotFoundController.onPageLoad(departureId: DepartureId)

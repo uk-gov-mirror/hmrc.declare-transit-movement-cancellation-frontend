@@ -17,9 +17,11 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
+import connectors.DepartureMovementConnector
 import forms.ConfirmCancellationFormProvider
 import matchers.JsonMatchers
-import models.{NormalMode, UserAnswers}
+import models.response.ResponseDeparture
+import models.{LocalReferenceNumber, NormalMode, UserAnswers}
 import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
@@ -40,11 +42,21 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
   def onwardRoute = Call("GET", "/foo")
 
+
   private val formProvider = new ConfirmCancellationFormProvider()
   private val form = formProvider()
   private val template = "confirmCancellation.njk"
 
   lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(departureId).url
+
+  val mockDepartureResponse: ResponseDeparture = {
+    ResponseDeparture(
+      LocalReferenceNumber("lrn"),
+      "DepartureSubmitted"
+    )
+  }
+
+  val mockConnector: DepartureMovementConnector = mock[DepartureMovementConnector]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -54,6 +66,11 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
   "ConfirmCancellation Controller" - {
 
     "must return OK and the correct view for a GET" in {
+
+      checkCancellationStatus()
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
@@ -85,8 +102,14 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
+      checkCancellationStatus()
+
+
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       val userAnswers = UserAnswers(departureId, eoriNumber).set(ConfirmCancellationPage, true).success.value
       dataRetrievalWithData(userAnswers)
@@ -107,7 +130,12 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must redirect to the next page when valid data is submitted and user selects Yes" in {
 
+      checkCancellationStatus()
+
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       dataRetrievalWithData(emptyUserAnswers)
 
@@ -125,7 +153,11 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must redirect to the next page when valid data is submitted and user selects No" in {
 
+      checkCancellationStatus()
       when(mockSessionRepository.set(any())) thenReturn Future.successful(false)
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       dataRetrievalWithData(emptyUserAnswers)
 
@@ -143,8 +175,13 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
+      checkCancellationStatus()
+
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       dataRetrievalWithData(emptyUserAnswers)
 
