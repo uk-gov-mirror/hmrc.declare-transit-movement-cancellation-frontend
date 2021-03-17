@@ -15,6 +15,7 @@
  */
 
 package controllers.actions
+import config.FrontendAppConfig
 import connectors.DepartureMovementConnector
 import models.DepartureId
 import models.requests.IdentifierRequest
@@ -28,15 +29,16 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector, renderer: Renderer)(implicit ec: ExecutionContext) {
-  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector, renderer)
+class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector, renderer: Renderer, appConfig: FrontendAppConfig)(implicit ec: ExecutionContext) {
+  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector, renderer, appConfig)
 
 }
 
 class CancellationStatusAction(
   departureId: DepartureId,
   departureMovementConnector: DepartureMovementConnector,
-  renderer: Renderer
+  renderer: Renderer,
+  appConfig: FrontendAppConfig
 )(implicit protected val executionContext: ExecutionContext)
     extends ActionFilter[IdentifierRequest] {
 
@@ -47,14 +49,20 @@ class CancellationStatusAction(
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
       case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) => {
-        renderer.render("canNotCancel.njk", Json.obj())(request).map(html => Option(BadRequest(html)))
+        val json= Json.obj(
+          "departureList"-> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+        )
+        renderer.render("canNotCancel.njk", json)(request).map(html => Option(BadRequest(html)))
       }
 
       case Some(responseDeparture: ResponseDeparture) if (validStatus.contains(responseDeparture.status)) =>
         Future.successful(None)
 
       case None => {
-        renderer.render("departureNotFound.njk", Json.obj())(request).map(html => Option(NotFound(html)))
+        val json= Json.obj(
+          "departureId"-> departureId
+        )
+        renderer.render("departureNotFound.njk", json)(request).map(html => Option(NotFound(html)))
       }
 
     }

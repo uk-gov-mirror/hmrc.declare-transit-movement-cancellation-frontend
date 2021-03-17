@@ -65,7 +65,7 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
 
       when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(Some(mockDepartureResponse)))
 
-      val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer)(implicitly))(DepartureId(1))
+      val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer, frontendAppConfig)(implicitly))(DepartureId(1))
 
       val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
 
@@ -89,7 +89,7 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
 
     when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(Some(mockDepartureResponse)))
 
-    val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer)(implicitly))(DepartureId(1))
+    val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer, frontendAppConfig)(implicitly))(DepartureId(1))
 
     val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
 
@@ -117,7 +117,7 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
 
     when(mockConnector.getDeparture(any())(any())).thenReturn(Future.successful(None))
 
-    val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer)(implicitly))(DepartureId(1))
+    val checkCancellationStatusProvider = (new CheckCancellationStatusProvider(mockConnector, renderer, frontendAppConfig)(implicitly))(DepartureId(1))
 
     val testRequest = IdentifierRequest(FakeRequest(GET, "/"), EoriNumber("eori"))
 
