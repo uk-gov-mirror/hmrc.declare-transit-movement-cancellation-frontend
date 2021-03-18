@@ -25,11 +25,14 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 
 import scala.concurrent.ExecutionContext
 
+// TODO: Delete this
 class IndexController @Inject()(
-    val controllerComponents: MessagesControllerComponents,
-    identify: IdentifierAction,
-    renderer: Renderer
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+  val controllerComponents: MessagesControllerComponents,
+  identify: IdentifierAction,
+  renderer: Renderer
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad: Action[AnyContent] = identify.async {
     implicit request =>

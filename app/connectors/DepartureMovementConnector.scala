@@ -35,6 +35,7 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
   private val channel: String = "web"
 
   def getDeparture(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[Option[ResponseDeparture]] = {
+
     val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}"
     val header     = hc.withExtraHeaders(ChannelHeader(channel))
 

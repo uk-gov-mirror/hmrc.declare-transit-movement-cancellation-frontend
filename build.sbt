@@ -52,10 +52,8 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     Concat.groups := Seq(
-      "javascripts/application.js" -> group(
-        Seq("lib/govuk-frontend/govuk/all.js")
-      )
-    ),
+      "javascripts/application.js" -> group(Seq("lib/govuk-frontend/govuk/all.js", "lib/hmrc-frontend/hmrc/all.js"))
+                         ),
     uglifyCompressOptions := Seq("unused=false", "dead_code=false"),
     pipelineStages in Assets := Seq(concat, uglify)
   )
@@ -76,7 +74,13 @@ lazy val root = (project in file("."))
 
 lazy val testSettings: Seq[Def.Setting[_]] = Seq(
   fork := true,
-  javaOptions ++= Seq("-Dconfig.resource=test.application.conf")
+  unmanagedResourceDirectories ++= Seq(
+    baseDirectory.value / "test" / "resources"
+  ),
+  javaOptions ++= Seq(
+    "-Dconfig.resource=test.application.conf",
+    "-Dconfig.logger=logback-test.xml"
+  )
 )
 
 dependencyOverrides ++= AppDependencies.overrides

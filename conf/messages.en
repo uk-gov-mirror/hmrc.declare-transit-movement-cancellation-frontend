@@ -157,3 +157,13 @@ cancellationSubmissionConfirmation.subHeading = What happens next
 cancellationSubmissionConfirmation.para2 = You will get a decision on this request in a few minutes.
 cancellationSubmissionConfirmation.linkText = View departure declarations
 
+
+canNotCancel.title = You cannot cancel this departure declaration
+canNotCancel.heading = You cannot cancel this departure declaration
+canNotCancel.message =  If you still need to cancel this departure declaration, you must
+canNotCancel.contactLink = contact the New Computerised Transit System (NCTS) Helpdesk (opens in a new tab)
+canNotCancel.linkText = Back to departure declarations
+
+departureNotFound.title = Departure record not found
+departureNotFound.heading = Departure record not found
+departureNotFound.para1 = No departure record found for departure id

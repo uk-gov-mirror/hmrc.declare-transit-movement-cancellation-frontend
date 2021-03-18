@@ -26,42 +26,46 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
 import repositories.SessionRepository
-import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
+import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CancellationReasonController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalActionProvider,
-                                       requireData: DataRequiredAction,
-                                       navigator:Navigator,
-                                       formProvider: CancellationReasonFormProvider,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       renderer: Renderer
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  checkCancellationStatus:CheckCancellationStatusProvider,
+  getData: DataRetrievalActionProvider,
+  requireData: DataRequiredAction,
+  navigator:Navigator,
+  formProvider: CancellationReasonFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  renderer: Renderer
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with NunjucksSupport {
 
-  private val form = formProvider()
+  private val form     = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
     implicit request =>
-
       val json = Json.obj(
-        "form" -> form,
-        "departureId"  -> departureId,
-        "mode" -> mode,
+        "form"        -> form,
+        "departureId" -> departureId,
+        "mode"        -> mode,
         "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
       )
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))andThen getData(departureId) andThen requireData).async {
 
     implicit request =>
+      val cancellationSubmission = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)
+
       form.bindFromRequest().fold(
         formWithErrors => {
           val json = Json.obj(

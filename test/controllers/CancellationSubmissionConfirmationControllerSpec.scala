@@ -51,11 +51,11 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
 
       val mockConnector = mock[DepartureMovementConnector]
 
-      when(mockConnector.getDeparture(any())(any()))
-        .thenReturn(Future.successful(Some(mockDepartureResponse)))
-
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
       val application =  guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
 

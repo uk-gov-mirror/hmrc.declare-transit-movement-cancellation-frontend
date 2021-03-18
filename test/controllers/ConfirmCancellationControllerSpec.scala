@@ -17,13 +17,19 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
+import connectors.DepartureMovementConnector
 import forms.ConfirmCancellationFormProvider
 import matchers.JsonMatchers
+import models.response.ResponseDeparture
+import models.{LocalReferenceNumber, NormalMode, UserAnswers}
+import navigation.{FakeNavigator, Navigator}
 import models.{NormalMode, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{times, verify, when}
 import pages.ConfirmCancellationPage
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -38,23 +44,30 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
   def onwardRoute = Call("GET", "/foo")
 
   private val formProvider = new ConfirmCancellationFormProvider()
-  private val form = formProvider()
-  private val template = "confirmCancellation.njk"
+  private val form         = formProvider()
+  private val template     = "confirmCancellation.njk"
 
   lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(departureId).url
 
-    "ConfirmCancellation Controller" - {
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
+
+  "ConfirmCancellation Controller" - {
 
     "must return OK and the correct view for a GET" in {
+
+      checkCancellationStatus()
 
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
       dataRetrievalWithData(emptyUserAnswers)
 
-      val request = FakeRequest(GET, confirmCancellationRoute)
+      val request        = FakeRequest(GET, confirmCancellationRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
+      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(app, request).value
 
@@ -63,10 +76,10 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> form,
-        "mode"   -> NormalMode,
-        "departureId"    -> departureId,
-        "radios" -> Radios.yesNo(form("value"))
+        "form"        -> form,
+        "mode"        -> NormalMode,
+        "departureId" -> departureId,
+        "radios"      -> Radios.yesNo(form("value"))
       )
 
 
@@ -77,15 +90,17 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must populate the view correctly on a GET when the question has previously been answered" in {
 
+      checkCancellationStatus()
+
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
       val userAnswers = UserAnswers(departureId, eoriNumber).set(ConfirmCancellationPage(departureId), true).success.value
       dataRetrievalWithData(userAnswers)
 
-      val request = FakeRequest(GET, confirmCancellationRoute)
+      val request        = FakeRequest(GET, confirmCancellationRoute)
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
+      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(app, request).value
 
@@ -98,6 +113,8 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
     }
 
     "must redirect to the next page when valid data is submitted and user selects Yes" in {
+
+      checkCancellationStatus()
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
@@ -117,6 +134,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must redirect to the next page when valid data is submitted and user selects No" in {
 
+      checkCancellationStatus()
       when(mockSessionRepository.set(any())) thenReturn Future.successful(false)
 
       dataRetrievalWithData(emptyUserAnswers)
@@ -135,15 +153,17 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
     "must return a Bad Request and errors when invalid data is submitted" in {
 
+      checkCancellationStatus()
+
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
       dataRetrievalWithData(emptyUserAnswers)
 
-      val request = FakeRequest(POST, confirmCancellationRoute).withFormUrlEncodedBody(("value", ""))
-      val boundForm = form.bind(Map("value" -> ""))
+      val request        = FakeRequest(POST, confirmCancellationRoute).withFormUrlEncodedBody(("value", ""))
+      val boundForm      = form.bind(Map("value" -> ""))
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
+      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(app, request).value
 
@@ -152,10 +172,10 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
       val expectedJson = Json.obj(
-        "form"   -> boundForm,
-        "mode"   -> NormalMode,
-        "departureId"    -> departureId,
-        "radios" -> Radios.yesNo(boundForm("value"))
+        "form"        -> boundForm,
+        "mode"        -> NormalMode,
+        "departureId" -> departureId,
+        "radios"      -> Radios.yesNo(boundForm("value"))
       )
 
       val jsonWithoutConfig = jsonCaptor.getValue - configKey
