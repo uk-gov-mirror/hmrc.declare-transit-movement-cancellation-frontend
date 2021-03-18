@@ -52,13 +52,13 @@ class CancellationStatusAction(
 
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
-      case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) =>
+      case Some(responseDeparture: ResponseDeparture) if !validStatus.contains(responseDeparture.status) =>
         val json = Json.obj(
           "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
         )
         renderer.render("canNotCancel.njk", json)(request).map(html => Option(BadRequest(html)))
 
-      case Some(responseDeparture: ResponseDeparture) if (validStatus.contains(responseDeparture.status)) =>
+      case Some(responseDeparture: ResponseDeparture) if validStatus.contains(responseDeparture.status) =>
         Future.successful(None)
 
       case None =>
