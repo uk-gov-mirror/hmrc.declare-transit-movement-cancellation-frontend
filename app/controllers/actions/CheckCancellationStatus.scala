@@ -24,13 +24,17 @@ import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, Result}
 import renderer.Renderer
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector, renderer: Renderer, appConfig: FrontendAppConfig)(implicit ec: ExecutionContext) {
-  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] = new CancellationStatusAction(departureId, departureMovementConnector, renderer, appConfig)
+class CheckCancellationStatusProvider @Inject()(departureMovementConnector: DepartureMovementConnector, renderer: Renderer, appConfig: FrontendAppConfig)(
+  implicit ec: ExecutionContext) {
+
+  def apply(departureId: DepartureId): ActionFilter[IdentifierRequest] =
+    new CancellationStatusAction(departureId, departureMovementConnector, renderer, appConfig)
 
 }
 
@@ -42,28 +46,26 @@ class CancellationStatusAction(
 )(implicit protected val executionContext: ExecutionContext)
     extends ActionFilter[IdentifierRequest] {
 
-  final val validStatus: Seq[String] = Seq("DepartureSubmitted", "MrnAllocated", "PositiveAcknowledgement");
+  final val validStatus: Seq[String] = Seq("DepartureSubmitted", "MrnAllocated", "PositiveAcknowledgement")
 
   override protected def filter[A](request: IdentifierRequest[A]): Future[Option[Result]] = {
 
-    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
-      case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) => {
-        val json= Json.obj(
-          "departureList"-> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+      case Some(responseDeparture: ResponseDeparture) if (!validStatus.contains(responseDeparture.status)) =>
+        val json = Json.obj(
+          "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
         )
         renderer.render("canNotCancel.njk", json)(request).map(html => Option(BadRequest(html)))
-      }
 
       case Some(responseDeparture: ResponseDeparture) if (validStatus.contains(responseDeparture.status)) =>
         Future.successful(None)
 
-      case None => {
-        val json= Json.obj(
-          "departureId"-> departureId
+      case None =>
+        val json = Json.obj(
+          "departureId" -> departureId
         )
         renderer.render("departureNotFound.njk", json)(request).map(html => Option(NotFound(html)))
-      }
 
     }
   }
