@@ -33,8 +33,17 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 
-trait SpecBase extends AnyFreeSpec with Matchers with GuiceOneAppPerSuite with OptionValues with TryValues
-  with ScalaFutures with IntegrationPatience with MockitoSugar with BeforeAndAfterEach  with MockNunjucksRendererApp{
+trait SpecBase
+    extends AnyFreeSpec
+    with Matchers
+    with GuiceOneAppPerSuite
+    with OptionValues
+    with TryValues
+    with ScalaFutures
+    with IntegrationPatience
+    with MockitoSugar
+    with BeforeAndAfterEach
+    with MockNunjucksRendererApp {
 
   override def beforeEach {
     Mockito.reset(mockRenderer)

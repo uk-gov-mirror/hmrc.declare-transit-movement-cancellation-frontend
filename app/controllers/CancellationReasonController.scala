@@ -33,53 +33,53 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class CancellationReasonController @Inject()(
-                                       override val messagesApi: MessagesApi,
-                                       sessionRepository: SessionRepository,
-                                       identify: IdentifierAction,
-                                       getData: DataRetrievalActionProvider,
-                                       requireData: DataRequiredAction,
-                                       formProvider: CancellationReasonFormProvider,
-                                       appConfig: FrontendAppConfig,
-                                       val controllerComponents: MessagesControllerComponents,
-                                       renderer: Renderer
-)(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  checkCancellationStatus:CheckCancellationStatusProvider,
+  formProvider: CancellationReasonFormProvider,
+  val controllerComponents: MessagesControllerComponents,
+  renderer: Renderer
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with NunjucksSupport {
 
-  private val form = formProvider()
+  private val form     = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
     implicit request =>
-
       val json = Json.obj(
-        "form" -> form,
-        "departureId"  -> departureId,
-        "mode" -> mode,
+        "form"        -> form,
+        "departureId" -> departureId,
+        "mode"        -> mode,
         "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
 
     implicit request =>
-    val cancellationSubmission  = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)
+      val cancellationSubmission = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)
 
-      form.bindFromRequest().fold(
-        formWithErrors => {
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => {
 
-          val json = Json.obj(
-            "form" -> formWithErrors,
-            "departureId"  -> departureId,
-            "mode" -> mode
-          )
+            val json = Json.obj(
+              "form"        -> formWithErrors,
+              "departureId" -> departureId,
+              "mode"        -> mode
+            )
 
-          renderer.render(template, json).map(BadRequest(_))
+            renderer.render(template, json).map(BadRequest(_))
 
-        },
-         value =>
-          Future.successful(Redirect(cancellationSubmission))
-        //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
-      )
+          },
+          value => Future.successful(Redirect(cancellationSubmission))
+          //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
+        )
   }
 }

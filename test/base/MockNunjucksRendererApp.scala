@@ -17,7 +17,7 @@
 package base
 
 import controllers.actions._
-import models.UserAnswers
+import models.{DepartureId, UserAnswers}
 import models.requests.{IdentifierRequest, OptionalDataRequest}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
@@ -29,7 +29,7 @@ import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.ActionTransformer
+import play.api.mvc.{ActionFilter, ActionTransformer, Result}
 import play.api.test.Helpers
 import repositories.SessionRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
@@ -43,12 +43,15 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
 
   val mockDataRetrievalActionProvider: DataRetrievalActionProvider = mock[DataRetrievalActionProvider]
 
+  val mockCheckCancellationStatusProvider: CheckCancellationStatusProvider = mock[CheckCancellationStatusProvider]
+
   val mockSessionRepository: SessionRepository = mock[SessionRepository]
 
   override def beforeEach {
     Mockito.reset(
       mockRenderer,
       mockDataRetrievalActionProvider,
+      mockCheckCancellationStatusProvider,
       mockSessionRepository
     )
     super.beforeEach()
@@ -76,6 +79,17 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
     when(mockDataRetrievalActionProvider.apply(any())).thenReturn(fakeDataRetrievalAction)
   }
 
+  def checkCancellationStatus(): Unit ={
+    val fakeCancellationStatusAction = new ActionFilter[IdentifierRequest] {
+      override protected def filter[A](request: IdentifierRequest[A]): Future[Option[Result]] =
+        Future.successful(None)
+
+      override protected def  executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
+    }
+
+    when(mockCheckCancellationStatusProvider.apply(any())).thenReturn(fakeCancellationStatusAction)
+  }
+
   override def fakeApplication(): Application =
     guiceApplicationBuilder()
       .build()
@@ -87,6 +101,7 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
         bind[DataRequiredAction].to[DataRequiredActionImpl],
         bind[IdentifierAction].to[FakeIdentifierAction],
         bind[DataRetrievalActionProvider].toInstance(mockDataRetrievalActionProvider),
+        bind[CheckCancellationStatusProvider].toInstance(mockCheckCancellationStatusProvider),
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
         bind[SessionRepository].toInstance(mockSessionRepository)

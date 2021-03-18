@@ -24,7 +24,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
-import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
@@ -32,54 +31,58 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ConfirmCancellationController @Inject()(
-                                               override val messagesApi: MessagesApi,
-                                               identify: IdentifierAction,
-                                               formProvider: ConfirmCancellationFormProvider,
-                                               appConfig: FrontendAppConfig,
-                                               val controllerComponents: MessagesControllerComponents,
-                                               renderer: Renderer
-                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  formProvider: ConfirmCancellationFormProvider,
+  checkCancellationStatus:CheckCancellationStatusProvider,
+  appConfig: FrontendAppConfig,
+  val controllerComponents: MessagesControllerComponents,
+  renderer: Renderer
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport
+    with NunjucksSupport {
 
-  private val form = formProvider()
+  private val form     = formProvider()
   private val template = "confirmCancellation.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
     implicit request =>
-
       val json = Json.obj(
-        "form" -> form,
-        "mode" -> mode,
+        "form"        -> form,
+        "mode"        -> mode,
         "departureId" -> departureId,
-        "radios" -> Radios.yesNo(form("value")),
+        "radios"      -> Radios.yesNo(form("value")),
         "onSubmitUrl" -> controllers.routes.ConfirmCancellationController.onSubmit(departureId).url
-
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = identify.async {
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
     implicit request =>
-      form.bindFromRequest().fold(
-        formWithErrors => {
+      form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => {
 
-          val json = Json.obj(
-            "form" -> formWithErrors,
-            "mode" -> mode,
-            "departureId" -> departureId,
-            "radios" -> Radios.yesNo(formWithErrors("value"))
-          )
-          renderer.render(template, json).map(BadRequest(_))
-        },
-        value =>
-          if (value) {
-            val cancellationReason = controllers.routes.CancellationReasonController.onPageLoad(departureId)
-               Future.successful(Redirect(cancellationReason))
+            val json = Json.obj(
+              "form"        -> formWithErrors,
+              "mode"        -> mode,
+              "departureId" -> departureId,
+              "radios"      -> Radios.yesNo(formWithErrors("value"))
+            )
+            renderer.render(template, json).map(BadRequest(_))
+          },
+          value =>
+            if (value) {
+              val cancellationReason = controllers.routes.CancellationReasonController.onPageLoad(departureId)
+              Future.successful(Redirect(cancellationReason))
 
-          } else {
-            val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
-            Future.successful(Redirect(viewDepartures))
+            } else {
+              val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+              Future.successful(Redirect(viewDepartures))
           }
-      )
+        )
   }
 }
