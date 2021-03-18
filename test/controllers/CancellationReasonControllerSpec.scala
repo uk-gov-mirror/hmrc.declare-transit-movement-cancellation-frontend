@@ -50,10 +50,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
   lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(departureId).url
 
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]) toInstance (new FakeNavigator(onwardRoute)))
+
 
   "CancellationReason Controller" - {
 

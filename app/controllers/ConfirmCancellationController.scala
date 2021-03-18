@@ -16,6 +16,7 @@
 
 package controllers
 
+
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
 import models.{DepartureId, Mode, UserAnswers}
@@ -35,85 +36,59 @@ class ConfirmCancellationController @Inject()(
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
   formProvider: ConfirmCancellationFormProvider,
-  checkCancellationStatus:CheckCancellationStatusProvider,
-  appConfig: FrontendAppConfig,
+  checkCancellationStatus: CheckCancellationStatusProvider,
+  navigator: Navigator,
+  getData: DataRetrievalActionProvider,
+  requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
     with NunjucksSupport {
-                                               override val messagesApi: MessagesApi,
-                                               identify: IdentifierAction,
-                                               formProvider: ConfirmCancellationFormProvider,
-                                               sessionRepository: SessionRepository,
-                                               navigator: Navigator,
-                                               getData: DataRetrievalActionProvider,
-                                               requireData: DataRequiredAction,
-                                               val controllerComponents: MessagesControllerComponents,
-                                               renderer: Renderer
-                                             )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
 
   private val form     = formProvider()
   private val template = "confirmCancellation.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen (checkCancellationStatus(departureId))).async {
     implicit request =>
       val json = Json.obj(
         "form"        -> form,
         "mode"        -> mode,
         "departureId" -> departureId,
-        "radios" -> Radios.yesNo(form("value"))
+        "radios"      -> Radios.yesNo(form("value"))
       )
 
       renderer.render(template, json).map(Ok(_))
   }
 
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
+    (identify andThen (checkCancellationStatus(departureId)) andThen getData(departureId)).async {
+      implicit request =>
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => {
 
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
-    implicit request =>
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => {
+              val json = Json.obj(
+                "form"        -> formWithErrors,
+                "mode"        -> mode,
+                "departureId" -> departureId,
+                "radios"      -> Radios.yesNo(formWithErrors("value"))
+              )
+              renderer.render(template, json).map(BadRequest(_))
+            },
+            value => {
+              val userAnswers = request.userAnswers match {
+                case Some(value) => value
+                case None        => UserAnswers(departureId, request.eoriNumber)
+              }
+              for {
+                updatedAnswers <- Future.fromTry(userAnswers.set(ConfirmCancellationPage(departureId), value))
 
-            val json = Json.obj(
-              "form"        -> formWithErrors,
-              "mode"        -> mode,
-              "departureId" -> departureId,
-              "radios"      -> Radios.yesNo(formWithErrors("value"))
-            )
-            renderer.render(template, json).map(BadRequest(_))
-          },
-          value =>
-            if (value) {
-              val cancellationReason = controllers.routes.CancellationReasonController.onPageLoad(departureId)
-              Future.successful(Redirect(cancellationReason))
-          val json = Json.obj(
-            "form" -> formWithErrors,
-            "mode" -> mode,
-            "departureId" -> departureId,
-            "radios" -> Radios.yesNo(formWithErrors("value"))
+              } yield Redirect(navigator.nextPage(ConfirmCancellationPage(departureId), mode, updatedAnswers))
+            }
           )
-          renderer.render(template, json).map(BadRequest(_))
-        },
-        value => {
-          val userAnswers = request.userAnswers match {
-            case Some(value) => value
-            case None => UserAnswers(departureId, request.eoriNumber)
-          }
-          for {
-            updatedAnswers <- Future.fromTry(userAnswers.set(ConfirmCancellationPage(departureId), value))
-            _ <- sessionRepository.set(updatedAnswers)
 
-            } else {
-              val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
-              Future.successful(Redirect(viewDepartures))
-          }
-        )
-          } yield Redirect(navigator.nextPage(ConfirmCancellationPage(departureId), mode, updatedAnswers))
-        }
-      )
-
-  }
+    }
 }
