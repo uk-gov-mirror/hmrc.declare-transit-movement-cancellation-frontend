@@ -20,7 +20,7 @@ import com.google.inject.Singleton
 
 import javax.inject.Inject
 import models.{DepartureId, LocalReferenceNumber}
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
 
@@ -29,22 +29,22 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class DataRetrievalActionProviderImpl @Inject()(sessionRepository: SessionRepository, ec: ExecutionContext) extends DataRetrievalActionProvider {
 
-  def apply(departureId: DepartureId): ActionTransformer[IdentifierRequest, OptionalDataRequest] =
+  def apply(departureId: DepartureId): ActionTransformer[AuthorisedRequest, OptionalDataRequest] =
     new DataRetrievalAction(departureId, ec, sessionRepository)
 }
 
 trait DataRetrievalActionProvider {
 
-  def apply(departureId: DepartureId): ActionTransformer[IdentifierRequest, OptionalDataRequest]
+  def apply(departureId: DepartureId): ActionTransformer[AuthorisedRequest, OptionalDataRequest]
 }
 
 class DataRetrievalAction(
                            departureId: DepartureId,
                            implicit protected val executionContext: ExecutionContext,
                            sessionRepository: SessionRepository
-                         ) extends ActionTransformer[IdentifierRequest, OptionalDataRequest] {
+                         ) extends ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
 
-  override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
+  override protected def transform[A](request: AuthorisedRequest[A]): Future[OptionalDataRequest[A]] =
     sessionRepository.get(departureId, request.eoriNumber).map {
       userAnswers =>
         OptionalDataRequest(request.request, request.eoriNumber, userAnswers)

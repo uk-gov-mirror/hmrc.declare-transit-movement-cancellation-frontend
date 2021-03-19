@@ -53,6 +53,7 @@ class CancellationReasonController @Inject()(
     implicit request =>
       val json = Json.obj(
         "form"        -> form,
+        "lrn"         -> request.lrn,
         "departureId" -> departureId,
         "mode"        -> mode,
         "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
@@ -64,7 +65,6 @@ class CancellationReasonController @Inject()(
     (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
 
       implicit request =>
-
         form
           .bindFromRequest()
           .fold(

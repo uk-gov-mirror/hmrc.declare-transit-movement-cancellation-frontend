@@ -37,14 +37,4 @@ class CheckYourAnswersController @Inject()(
     renderer: Renderer
 )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport with NunjucksSupport {
 
-  def onPageLoad(departureId: DepartureId): Action[AnyContent] = (identify andThen getData(departureId) andThen requireData).async {
-    implicit request =>
-
-      val answers: Seq[SummaryList.Row] = Seq()
-
-      renderer.render(
-        "check-your-answers.njk",
-        Json.obj("list" -> answers)
-      ).map(Ok(_))
-  }
 }
