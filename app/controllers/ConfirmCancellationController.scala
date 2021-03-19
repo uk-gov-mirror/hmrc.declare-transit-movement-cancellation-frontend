@@ -16,7 +16,6 @@
 
 package controllers
 
-
 import controllers.actions._
 import forms.ConfirmCancellationFormProvider
 import models.requests.AuthorisedRequest
@@ -40,7 +39,6 @@ class ConfirmCancellationController @Inject()(
   checkCancellationStatus: CheckCancellationStatusProvider,
   navigator: Navigator,
   getData: DataRetrievalActionProvider,
-  requireData: DataRequiredAction,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
 )(implicit ec: ExecutionContext)
@@ -56,7 +54,7 @@ class ConfirmCancellationController @Inject()(
       val json = Json.obj(
         "form"        -> form,
         "mode"        -> mode,
-        "lrn" -> request.lrn,
+        "lrn"         -> request.lrn,
         "departureId" -> departureId,
         "radios"      -> Radios.yesNo(form("value"))
       )
@@ -65,7 +63,7 @@ class ConfirmCancellationController @Inject()(
   }
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
-    (identify  andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
       implicit request =>
         form
           .bindFromRequest()
@@ -87,7 +85,6 @@ class ConfirmCancellationController @Inject()(
               }
               for {
                 updatedAnswers <- Future.fromTry(userAnswers.set(ConfirmCancellationPage(departureId), value))
-
               } yield Redirect(navigator.nextPage(ConfirmCancellationPage(departureId), mode, updatedAnswers))
             }
           )

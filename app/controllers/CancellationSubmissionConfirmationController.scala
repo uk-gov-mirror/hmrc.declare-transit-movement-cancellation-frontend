@@ -31,25 +31,28 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class CancellationSubmissionConfirmationController @Inject()(
-                                                              override val messagesApi: MessagesApi,
-                                                              identify: IdentifierAction,
-                                                              departureMovementConnector: DepartureMovementConnector,
-                                                              val controllerComponents: MessagesControllerComponents,
-                                                              appConfig: FrontendAppConfig,
-                                                              renderer: Renderer
-                                                            )(implicit ec: ExecutionContext) extends FrontendBaseController with I18nSupport {
+  override val messagesApi: MessagesApi,
+  identify: IdentifierAction,
+  departureMovementConnector: DepartureMovementConnector,
+  val controllerComponents: MessagesControllerComponents,
+  appConfig: FrontendAppConfig,
+  getData: DataRetrievalActionProvider,
+  renderer: Renderer
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
+    with I18nSupport {
 
   def onPageLoad(departureId: DepartureId): Action[AnyContent] = identify.async {
     implicit request =>
-                          departureMovementConnector.getDeparture(departureId).flatMap{
-                            case Some(responseDeparture: ResponseDeparture) =>
-                              val json= Json.obj(
-                                "lrn" -> responseDeparture.localReferenceNumber,
-                                "departureList"-> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
-                              )
-                              renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
-                            case None =>
-                              renderer.render("cancellationSubmissionConfirmation.njk", Json.obj()).map(Ok(_))
-                          }
+      departureMovementConnector.getDeparture(departureId).flatMap {
+        case Some(responseDeparture: ResponseDeparture) =>
+          val json = Json.obj(
+            "lrn"           -> responseDeparture.localReferenceNumber,
+            "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+          )
+          renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
+        case None =>
+          renderer.render("cancellationSubmissionConfirmation.njk", Json.obj()).map(Ok(_))
+      }
   }
 }
