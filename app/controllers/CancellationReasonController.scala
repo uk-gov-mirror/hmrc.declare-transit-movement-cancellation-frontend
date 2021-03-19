@@ -49,17 +49,17 @@ class CancellationReasonController @Inject()(
   private val form     = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen checkCancellationStatus(departureId)).async {
-    implicit request =>
-      val json = Json.obj(
-        "form"        -> form,
-        "lrn"         -> request.lrn,
-        "departureId" -> departureId,
-        "mode"        -> mode,
-        "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
-      )
-      renderer.render(template, json).map(Ok(_))
-  }
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] =
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
+      implicit request =>
+        val json = Json.obj(
+          "form"        -> form,
+          "lrn"         -> request.lrn,
+          "departureId" -> departureId,
+          "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
+        )
+        renderer.render(template, json).map(Ok(_))
+    }
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
     (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
@@ -71,8 +71,8 @@ class CancellationReasonController @Inject()(
             formWithErrors => {
               val json = Json.obj(
                 "form"        -> formWithErrors,
+                "lrn"         -> request.lrn,
                 "departureId" -> departureId,
-                "mode"        -> mode
               )
               renderer.render(template, json).map(BadRequest(_))
             },

@@ -49,18 +49,18 @@ class ConfirmCancellationController @Inject()(
   private val form     = formProvider()
   private val template = "confirmCancellation.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen (checkCancellationStatus(departureId))).async {
-    implicit request =>
-      val json = Json.obj(
-        "form"        -> form,
-        "mode"        -> mode,
-        "lrn"         -> request.lrn,
-        "departureId" -> departureId,
-        "radios"      -> Radios.yesNo(form("value"))
-      )
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] =
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
+      implicit request =>
+        val json = Json.obj(
+          "form"        -> form,
+          "lrn"         -> request.lrn,
+          "departureId" -> departureId,
+          "radios"      -> Radios.yesNo(form("value"))
+        )
 
-      renderer.render(template, json).map(Ok(_))
-  }
+        renderer.render(template, json).map(Ok(_))
+    }
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
     (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
@@ -72,7 +72,7 @@ class ConfirmCancellationController @Inject()(
 
               val json = Json.obj(
                 "form"        -> formWithErrors,
-                "mode"        -> mode,
+                "lrn"         -> request.lrn,
                 "departureId" -> departureId,
                 "radios"      -> Radios.yesNo(formWithErrors("value"))
               )

@@ -36,7 +36,6 @@ class CancellationSubmissionConfirmationController @Inject()(
   departureMovementConnector: DepartureMovementConnector,
   val controllerComponents: MessagesControllerComponents,
   appConfig: FrontendAppConfig,
-  getData: DataRetrievalActionProvider,
   renderer: Renderer
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
