@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.CancellationReasonFormProvider
-import models.{DepartureId, Mode}
+import models.{DepartureId, Mode, UserAnswers}
 import navigation.Navigator
 import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -50,19 +50,19 @@ class CancellationReasonController @Inject()(
   private val template = "cancellationReason.njk"
 
   def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] =
-    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
       implicit request =>
         val json = Json.obj(
           "form"        -> form,
           "lrn"         -> request.lrn,
           "departureId" -> departureId,
-          "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
+          "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url
         )
         renderer.render(template, json).map(Ok(_))
     }
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
-    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
 
       implicit request =>
         form
@@ -72,15 +72,21 @@ class CancellationReasonController @Inject()(
               val json = Json.obj(
                 "form"        -> formWithErrors,
                 "lrn"         -> request.lrn,
-                "departureId" -> departureId,
+                "departureId" -> departureId
               )
               renderer.render(template, json).map(BadRequest(_))
             },
-            value =>
+            value => {
+              val userAnswers = request.userAnswers match {
+                case Some(value) => value
+                case None        => UserAnswers(departureId, request.eoriNumber)
+              }
               for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage(departureId), value))
+                updatedAnswers <- Future.fromTry(userAnswers.set(CancellationReasonPage(departureId), value))
               } yield Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers))
+            }
             //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
           )
+
     }
 }
