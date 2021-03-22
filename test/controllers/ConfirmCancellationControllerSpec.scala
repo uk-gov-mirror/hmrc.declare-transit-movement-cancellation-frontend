@@ -17,19 +17,13 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
-import connectors.DepartureMovementConnector
 import forms.ConfirmCancellationFormProvider
 import matchers.JsonMatchers
-import models.response.ResponseDeparture
-import models.{LocalReferenceNumber, NormalMode, UserAnswers}
-import navigation.{FakeNavigator, Navigator}
-import models.{NormalMode, UserAnswers}
+import models.{LocalReferenceNumber, UserAnswers}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.{times, verify, when}
 import pages.ConfirmCancellationPage
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -73,7 +67,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       val expectedJson = Json.obj(
         "form"        -> form,
-        "mode"        -> NormalMode,
+        "lrn" -> LocalReferenceNumber(""),
         "departureId" -> departureId,
         "radios"      -> Radios.yesNo(form("value"))
       )
@@ -169,7 +163,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       val expectedJson = Json.obj(
         "form"        -> boundForm,
-        "mode"        -> NormalMode,
+        "lrn" -> LocalReferenceNumber(""),
         "departureId" -> departureId,
         "radios"      -> Radios.yesNo(boundForm("value"))
       )

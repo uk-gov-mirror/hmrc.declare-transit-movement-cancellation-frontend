@@ -60,7 +60,7 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
   def dataRetrievalWithData(userAnswers: UserAnswers): Unit = {
     val fakeDataRetrievalAction = new ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
       override protected def transform[A](request: AuthorisedRequest[A]): Future[OptionalDataRequest[A]] =
-        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, Some(userAnswers)))
+        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, LocalReferenceNumber(""), Some(userAnswers)))
 
       override protected def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
     }
@@ -71,7 +71,7 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
   def dataRetrievalNoData(): Unit = {
     val fakeDataRetrievalAction = new ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
       override protected def transform[A](request: AuthorisedRequest[A]): Future[OptionalDataRequest[A]] =
-        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, None))
+        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, LocalReferenceNumber(""), None))
 
       override protected def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
     }
