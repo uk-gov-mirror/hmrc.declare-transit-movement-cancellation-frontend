@@ -50,19 +50,18 @@ class CancellationReasonController @Inject()(
   private val template = "cancellationReason.njk"
 
   def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] =
-    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
       implicit request =>
         val json = Json.obj(
           "form"        -> form,
           "lrn"         -> request.lrn,
-          "departureId" -> departureId,
-          "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url
+          "departureId" -> departureId
         )
         renderer.render(template, json).map(Ok(_))
     }
 
   def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
-    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId)).async {
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
 
       implicit request =>
         form
@@ -77,12 +76,8 @@ class CancellationReasonController @Inject()(
               renderer.render(template, json).map(BadRequest(_))
             },
             value => {
-              val userAnswers = request.userAnswers match {
-                case Some(value) => value
-                case None        => UserAnswers(departureId, request.eoriNumber)
-              }
               for {
-                updatedAnswers <- Future.fromTry(userAnswers.set(CancellationReasonPage(departureId), value))
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage(departureId), value))
               } yield Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers))
             }
             //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET

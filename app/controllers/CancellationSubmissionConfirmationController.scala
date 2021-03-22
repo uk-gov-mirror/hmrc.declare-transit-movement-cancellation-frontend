@@ -51,7 +51,10 @@ class CancellationSubmissionConfirmationController @Inject()(
           )
           renderer.render("cancellationSubmissionConfirmation.njk", json).map(Ok(_))
         case None =>
-          renderer.render("cancellationSubmissionConfirmation.njk", Json.obj()).map(Ok(_))
+          val json = Json.obj(
+            "departureId" -> departureId
+          )
+          renderer.render("departureNotFound.njk", json).map(Ok(_))
       }
   }
 }

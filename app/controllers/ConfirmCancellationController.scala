@@ -26,6 +26,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import repositories.SessionRepository
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.{NunjucksSupport, Radios}
 
@@ -35,6 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ConfirmCancellationController @Inject()(
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
+  sessionRepository: SessionRepository,
   formProvider: ConfirmCancellationFormProvider,
   checkCancellationStatus: CheckCancellationStatusProvider,
   navigator: Navigator,
@@ -85,6 +87,7 @@ class ConfirmCancellationController @Inject()(
               }
               for {
                 updatedAnswers <- Future.fromTry(userAnswers.set(ConfirmCancellationPage(departureId), value))
+                _              <- sessionRepository.set(updatedAnswers)
               } yield Redirect(navigator.nextPage(ConfirmCancellationPage(departureId), mode, updatedAnswers))
             }
           )
