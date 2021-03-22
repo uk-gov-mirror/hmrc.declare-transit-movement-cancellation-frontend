@@ -105,12 +105,6 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
   }
 
   "will get a 404 and will load the departure not found page when the departure record is not found" in {
-    val mockDepartureResponse: ResponseDeparture = {
-      ResponseDeparture(
-        LocalReferenceNumber("lrn"),
-        "InvalidStatus"
-      )
-    }
 
     when(mockRenderer.render(any(), any())(any()))
       .thenReturn(Future.successful(Html("")))
@@ -129,7 +123,7 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
     status(result) mustEqual NOT_FOUND
     verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
     contentAsString(result) must not be ("fake ok result value")
-    templateCaptor.getValue mustEqual "departureNotFound.njk"
+    templateCaptor.getValue mustEqual "canNotCancel.njk"
   }
 
 }

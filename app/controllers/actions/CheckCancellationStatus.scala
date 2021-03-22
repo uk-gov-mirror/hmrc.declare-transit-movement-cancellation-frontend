@@ -21,7 +21,7 @@ import connectors.DepartureMovementConnector
 import models.DepartureId
 import models.requests.{AuthorisedRequest, IdentifierRequest}
 import models.response.ResponseDeparture
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Results._
 import play.api.mvc.{ActionRefiner, Result}
 import renderer.Renderer
@@ -54,19 +54,17 @@ class CancellationStatusAction(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
       case Some(responseDeparture: ResponseDeparture) if !validStatus.contains(responseDeparture.status) =>
-        val json = Json.obj(
+        renderer.render("canNotCancel.njk", Json.obj(
           "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
-        )
-        renderer.render("canNotCancel.njk", json)(request).map(html => Left(BadRequest(html)))
+        ))(request).map(html => Left(BadRequest(html)))
 
       case Some(responseDeparture: ResponseDeparture) if validStatus.contains(responseDeparture.status) =>
         Future.successful(Right(AuthorisedRequest(request.request, request.eoriNumber, responseDeparture.localReferenceNumber)))
 
       case None =>
-        val json = Json.obj(
-          "departureId" -> departureId
-        )
-        renderer.render("departureNotFound.njk", json)(request).map(html => Left(NotFound(html)))
+        renderer.render("canNotCancel.njk", Json.obj(
+          "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+        ))(request).map(html => Left(NotFound(html)))
 
     }
   }

@@ -54,7 +54,7 @@ class CancellationSubmissionConfirmationController @Inject()(
           val json = Json.obj(
             "departureId" -> departureId
           )
-          renderer.render("departureNotFound.njk", json).map(Ok(_))
+          renderer.render("canNotCancel.njk", json).map(NotFound(_))
       }
   }
 }
