@@ -62,7 +62,7 @@ class CancellationStatusAction(
         Future.successful(Right(AuthorisedRequest(request.request, request.eoriNumber, responseDeparture.localReferenceNumber)))
 
       case None =>
-        renderer.render("canNotCancel.njk", Json.obj(
+        renderer.render("declarationNotFound.njk", Json.obj(
           "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
         ))(request).map(html => Left(NotFound(html)))
 
