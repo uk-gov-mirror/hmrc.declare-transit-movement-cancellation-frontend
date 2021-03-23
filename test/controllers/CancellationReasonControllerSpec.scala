@@ -17,19 +17,14 @@
 package controllers
 
 import base.{MockNunjucksRendererApp, SpecBase}
-import connectors.DepartureMovementConnector
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
-import models.response.ResponseDeparture
-import models.{LocalReferenceNumber, NormalMode}
-import navigation.{FakeNavigator, Navigator}
+import models.LocalReferenceNumber
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.CancellationReasonPage
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -49,10 +44,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
   lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(departureId).url
 
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]) toInstance (new FakeNavigator(onwardRoute)))
+
 
   "CancellationReason Controller" - {
 
@@ -77,7 +69,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       val expectedJson = Json.obj(
         "form"        -> form,
-        "mode"        -> NormalMode,
+        "lrn" -> LocalReferenceNumber(""),
         "departureId" -> departureId
       )
 
@@ -95,7 +87,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       when(mockRenderer.render(any(), any())(any()))
         .thenReturn(Future.successful(Html("")))
 
-      val userAnswers = emptyUserAnswers.set(CancellationReasonPage, "answer").success.value
+      val userAnswers = emptyUserAnswers.set(CancellationReasonPage(departureId), "answer").success.value
       dataRetrievalWithData(userAnswers)
 
       val request        = FakeRequest(GET, cancellationReasonRoute)
@@ -155,7 +147,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       val expectedJson = Json.obj(
         "form"        -> boundForm,
         "departureId" -> departureId,
-        "mode"        -> NormalMode
+        "lrn" -> LocalReferenceNumber("")
       )
 
       templateCaptor.getValue mustEqual template

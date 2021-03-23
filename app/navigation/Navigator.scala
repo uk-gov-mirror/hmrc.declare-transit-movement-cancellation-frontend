@@ -16,21 +16,41 @@
 
 package navigation
 
-import javax.inject.{Inject, Singleton}
-
-import play.api.mvc.Call
+import com.google.inject.{Inject, Singleton}
+import config.FrontendAppConfig
 import controllers.routes
-import pages._
 import models._
+import pages.{ConfirmCancellationPage, _}
+import play.api.mvc.Call
 
 @Singleton
-class Navigator @Inject()() {
+class Navigator @Inject()(val appConfig: FrontendAppConfig) {
 
-  private val normalRoutes: Page => UserAnswers => Call = {
-    case _ => _ => routes.IndexController.onPageLoad()
+  private val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+  protected def normalRoutes: PartialFunction[Page, UserAnswers => Option[Call]] = {
+
+    case ConfirmCancellationPage(departureId) => ua => Some(confirmCancellationRoute(ua,  departureId))
+    case CancellationReasonPage(departureId)  => ua =>  Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
   }
 
-  def nextPage(page: Page,  userAnswers: UserAnswers): Call =
-      normalRoutes(page)(userAnswers)
+   def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Call = {
+     ua.get(ConfirmCancellationPage(departureId)) match {
+       case Some(true) => routes.CancellationReasonController.onPageLoad(departureId)
+       case Some(false) => Call("GET", viewDepartures)
+    }
+  }
 
+  private def handleCall(userAnswers: UserAnswers, call: UserAnswers => Option[Call]) =
+    call(userAnswers) match {
+      case Some(onwardRoute) => onwardRoute
+      case None => routes.SessionExpiredController.onPageLoad()
+    }
+
+  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
+    case NormalMode =>
+      normalRoutes.lift(page) match {
+        case None => routes.IndexController.onPageLoad()
+        case Some(call) => handleCall(userAnswers, call)
+      }
+  }
 }

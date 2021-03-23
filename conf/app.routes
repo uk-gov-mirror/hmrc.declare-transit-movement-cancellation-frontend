@@ -8,8 +8,6 @@ GET        /language/:lang                                          controllers.
 
 GET        /this-service-has-been-reset                             controllers.SessionExpiredController.onPageLoad
 
-GET        /:departureId/check-your-answers                         controllers.CheckYourAnswersController.onPageLoad(departureId: DepartureId)
-
 GET        /unauthorised                                            controllers.UnauthorisedController.onPageLoad
 
 GET        /accessibility-statement                                 controllers.AccessibilityController.onPageLoad

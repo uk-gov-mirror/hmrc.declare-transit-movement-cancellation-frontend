@@ -17,24 +17,21 @@
 package connectors
 
 import config.FrontendAppConfig
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import logging.Logging
 import models.DepartureId
 import models.response.ResponseDeparture
-import play.api.Logger
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) {
+class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) extends Logging {
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
-  val logger: Logger          = Logger(getClass)
   private val channel: String = "web"
 
   def getDeparture(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[Option[ResponseDeparture]] = {

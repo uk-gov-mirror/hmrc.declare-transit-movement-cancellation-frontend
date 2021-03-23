@@ -17,8 +17,8 @@
 package base
 
 import controllers.actions._
-import models.{DepartureId, UserAnswers}
-import models.requests.{IdentifierRequest, OptionalDataRequest}
+import models.{DepartureId, LocalReferenceNumber, UserAnswers}
+import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.when
@@ -29,7 +29,7 @@ import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{ActionFilter, ActionTransformer, Result}
+import play.api.mvc.{ActionFilter, ActionRefiner, ActionTransformer, Result}
 import play.api.test.Helpers
 import repositories.SessionRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
@@ -58,9 +58,9 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
   }
 
   def dataRetrievalWithData(userAnswers: UserAnswers): Unit = {
-    val fakeDataRetrievalAction = new ActionTransformer[IdentifierRequest, OptionalDataRequest] {
-      override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, Some(userAnswers)))
+    val fakeDataRetrievalAction = new ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
+      override protected def transform[A](request: AuthorisedRequest[A]): Future[OptionalDataRequest[A]] =
+        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, LocalReferenceNumber(""), Some(userAnswers)))
 
       override protected def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
     }
@@ -69,9 +69,9 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
   }
 
   def dataRetrievalNoData(): Unit = {
-    val fakeDataRetrievalAction = new ActionTransformer[IdentifierRequest, OptionalDataRequest] {
-      override protected def transform[A](request: IdentifierRequest[A]): Future[OptionalDataRequest[A]] =
-        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, None))
+    val fakeDataRetrievalAction = new ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
+      override protected def transform[A](request: AuthorisedRequest[A]): Future[OptionalDataRequest[A]] =
+        Future.successful(OptionalDataRequest(request.request, request.eoriNumber, LocalReferenceNumber(""), None))
 
       override protected def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
     }
@@ -79,12 +79,12 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
     when(mockDataRetrievalActionProvider.apply(any())).thenReturn(fakeDataRetrievalAction)
   }
 
-  def checkCancellationStatus(): Unit ={
-    val fakeCancellationStatusAction = new ActionFilter[IdentifierRequest] {
-      override protected def filter[A](request: IdentifierRequest[A]): Future[Option[Result]] =
-        Future.successful(None)
+  def checkCancellationStatus(): Unit = {
+    val fakeCancellationStatusAction = new ActionRefiner[IdentifierRequest, AuthorisedRequest] {
+      override protected def refine[A](request: IdentifierRequest[A]): Future[Either[Result, AuthorisedRequest[A]]] =
+        Future.successful(Right(AuthorisedRequest(request.request, request.eoriNumber, LocalReferenceNumber(""))))
 
-      override protected def  executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
+      override protected def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.global
     }
 
     when(mockCheckCancellationStatusProvider.apply(any())).thenReturn(fakeCancellationStatusAction)

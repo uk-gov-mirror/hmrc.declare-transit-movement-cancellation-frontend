@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package navigation
+package pages
 
-import com.google.inject.Inject
-import models.UserAnswers
-import pages.Page
-import play.api.Mode
-import play.api.mvc.Call
+import models.DepartureId
+import play.api.libs.json.JsPath
 
-
-class FakeNavigator @Inject()()(desiredRoute: Call)  {
-
-      def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
-       desiredRoute
-
-}
+case class CancellationSubmissionConfirmationPage(departureId: DepartureId) extends Page()

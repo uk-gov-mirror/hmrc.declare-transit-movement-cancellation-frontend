@@ -25,19 +25,20 @@ trait UserAnswersEntryGenerators extends PageGenerators {
 
   self: Generators =>
 
-  implicit lazy val arbitraryCancellationReasonAnswersEntry: Arbitrary[(CancellationReasonPage.type, JsValue)] =
+  implicit lazy val arbitraryCancellationReasonAnswersEntry: Arbitrary[(CancellationReasonPage, JsValue)] =
     Arbitrary {
       for {
-        page  <- arbitrary[CancellationReasonPage.type]
+        page  <- arbitrary[CancellationReasonPage]
         value <- arbitrary[String].suchThat(_.nonEmpty).map(Json.toJson(_))
       } yield (page, value)
     }
 
 
-  implicit lazy val arbitraryConfirmCancellationUserAnswersEntry: Arbitrary[(ConfirmCancellationPage.type, JsValue)] =
+  implicit lazy val arbitraryConfirmCancellationUserAnswersEntry: Arbitrary[(ConfirmCancellationPage, JsValue)] =
     Arbitrary {
       for {
+        page  <-arbitrary[ConfirmCancellationPage]
         value <- arbitrary[Boolean].map(Json.toJson(_))
-      } yield (ConfirmCancellationPage, value)
+              } yield (page, value)
     }
 }

@@ -16,17 +16,18 @@
 
 package pages
 
+import models.DepartureId
 import pages.behaviours.PageBehaviours
 
 
-class CancellationReasonPageSpec extends PageBehaviours {
+class CancellationReasonPageSpec(departure:DepartureId) extends PageBehaviours {
 
   "CancellationReasonPage" - {
 
-    beRetrievable[String](CancellationReasonPage)
+    beRetrievable[String](CancellationReasonPage(departure))
 
-    beSettable[String](CancellationReasonPage)
+    beSettable[String](CancellationReasonPage(departure))
 
-    beRemovable[String](CancellationReasonPage)
+    beRemovable[String](CancellationReasonPage(departure))
   }
 }

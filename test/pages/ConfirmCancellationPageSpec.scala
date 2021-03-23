@@ -16,16 +16,17 @@
 
 package pages
 
+import models.DepartureId
 import pages.behaviours.PageBehaviours
 
-class ConfirmCancellationPageSpec extends PageBehaviours {
+class ConfirmCancellationPageSpec(departure:DepartureId) extends PageBehaviours {
 
   "ConfirmCancellationPage" - {
 
-    beRetrievable[Boolean](ConfirmCancellationPage)
+    beRetrievable[Boolean](ConfirmCancellationPage(departure))
 
-    beSettable[Boolean](ConfirmCancellationPage)
+    beSettable[Boolean](ConfirmCancellationPage(departure))
 
-    beRemovable[Boolean](ConfirmCancellationPage)
+    beRemovable[Boolean](ConfirmCancellationPage(departure))
   }
 }

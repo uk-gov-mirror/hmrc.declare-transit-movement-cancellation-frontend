@@ -18,8 +18,8 @@ package controllers.actions
 
 import base.SpecBase
 import generators.Generators
-import models.requests.{IdentifierRequest, OptionalDataRequest}
-import models.{EoriNumber, DepartureId, UserAnswers}
+import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
+import models.{DepartureId, EoriNumber, LocalReferenceNumber, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -53,7 +53,7 @@ class DataRetrievalActionSpec extends SpecBase with GuiceOneAppPerSuite with Gen
 
     actionProvider(departureId)
       .invokeBlock(
-        IdentifierRequest(FakeRequest(GET, "/").asInstanceOf[Request[AnyContent]], EoriNumber("")), {
+        AuthorisedRequest(FakeRequest(GET, "/").asInstanceOf[Request[AnyContent]], EoriNumber(""), LocalReferenceNumber("")), {
           request: OptionalDataRequest[AnyContent] =>
             f(request)
             Future.successful(Results.Ok)

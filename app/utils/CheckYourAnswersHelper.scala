@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter
 
 class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messages) {
 
-  def cancellationReason(departureId: DepartureId): Option[Row] = userAnswers.get(CancellationReasonPage) map {
+  def cancellationReason(departureId: DepartureId): Option[Row] = userAnswers.get(CancellationReasonPage(departureId)) map {
     answer =>
       Row(
         key     = Key(msg"cancellationReason.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
@@ -42,7 +42,7 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messag
       )
   }
 
-  def confirmCancellation(departureId: DepartureId): Option[Row] = userAnswers.get(ConfirmCancellationPage) map {
+  def confirmCancellation(departureId: DepartureId): Option[Row] = userAnswers.get(ConfirmCancellationPage(departureId)) map {
     answer =>
       Row(
         key     = Key(msg"confirmCancellation.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),

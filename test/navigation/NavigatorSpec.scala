@@ -17,27 +17,70 @@
 package navigation
 
 import base.SpecBase
+import config.FrontendAppConfig
 import controllers.routes
 import generators.Generators
-import pages._
 import models._
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import pages._
 
-class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
+class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generators  {
 
-  val navigator = new Navigator
+  val appConfig = app.injector.instanceOf[FrontendAppConfig]
+
+  private val navigator: Navigator = new Navigator(appConfig)
+  private val viewDepartures: String = s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
 
   "Navigator" - {
-      "must go from a page that doesn't exist in the route map to Index" in {
+    "must go from a page that doesn't exist in the route map to Index" in {
 
-        case object UnknownPage extends Page
+      case object UnknownPage extends Page
 
-        forAll(arbitrary[UserAnswers]) {
-          answers =>
-            navigator.nextPage(UnknownPage, answers)
-              .mustBe(routes.IndexController.onPageLoad())
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          navigator
+            .nextPage(UnknownPage,NormalMode,  answers)
+            .mustBe(routes.IndexController.onPageLoad())
 
+      }
+    }
+    "Must go from ConfirmCancellationPage to CancellationReason page when user selects yes" in {
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          val updatedAnswers = answers
+            .set(ConfirmCancellationPage(departureId), true)
+            .success
+            .value
+          navigator
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode,  updatedAnswers)
+            .mustBe(routes.CancellationReasonController.onPageLoad(departureId))
+      }
+    }
+
+    "Must go from ConfirmCancellationPage to Declaration view when user selects no" in {
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          val updatedAnswers = answers
+            .set(ConfirmCancellationPage(departureId), false)
+            .success
+            .value
+          navigator
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers).url
+            .mustBe (viewDepartures)
+      }
+    }
+
+    "Must go from CancellationReason page to Confirmation page " in {
+      forAll(arbitrary[UserAnswers]) {
+        answers =>
+          val updatedAnswers = answers
+            .set(CancellationReasonPage(departureId), "Test reason")
+            .success
+            .value
+          navigator
+            .nextPage(CancellationReasonPage(departureId), NormalMode, updatedAnswers)
+            .mustBe (routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
       }
     }
   }

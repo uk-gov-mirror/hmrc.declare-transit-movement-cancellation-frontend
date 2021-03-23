@@ -16,17 +16,16 @@
 
 package controllers
 
-import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
-import models.{DepartureId, LocalReferenceNumber, Mode}
+import models.{DepartureId, Mode, UserAnswers}
+import navigation.Navigator
 import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
-import repositories.SessionRepository
-import uk.gov.hmrc.play.bootstrap.controller.FrontendBaseController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import javax.inject.Inject
@@ -35,7 +34,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class CancellationReasonController @Inject()(
   override val messagesApi: MessagesApi,
   identify: IdentifierAction,
-  checkCancellationStatus:CheckCancellationStatusProvider,
+  checkCancellationStatus: CheckCancellationStatusProvider,
+  getData: DataRetrievalActionProvider,
+  requireData: DataRequiredAction,
+  navigator: Navigator,
   formProvider: CancellationReasonFormProvider,
   val controllerComponents: MessagesControllerComponents,
   renderer: Renderer
@@ -47,39 +49,39 @@ class CancellationReasonController @Inject()(
   private val form     = formProvider()
   private val template = "cancellationReason.njk"
 
-  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
-    implicit request =>
-      val json = Json.obj(
-        "form"        -> form,
-        "departureId" -> departureId,
-        "mode"        -> mode,
-        "onSubmitUrl" -> controllers.routes.CancellationReasonController.onSubmit(departureId).url,
-      )
-
-      renderer.render(template, json).map(Ok(_))
-  }
-
-  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] = (identify andThen(checkCancellationStatus(departureId))).async {
-
-    implicit request =>
-      val cancellationSubmission = controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)
-
-      form
-        .bindFromRequest()
-        .fold(
-          formWithErrors => {
-
-            val json = Json.obj(
-              "form"        -> formWithErrors,
-              "departureId" -> departureId,
-              "mode"        -> mode
-            )
-
-            renderer.render(template, json).map(BadRequest(_))
-
-          },
-          value => Future.successful(Redirect(cancellationSubmission))
-          //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
+  def onPageLoad(departureId: DepartureId, mode: Mode): Action[AnyContent] =
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
+      implicit request =>
+        val json = Json.obj(
+          "form"        -> form,
+          "lrn"         -> request.lrn,
+          "departureId" -> departureId
         )
-  }
+        renderer.render(template, json).map(Ok(_))
+    }
+
+  def onSubmit(departureId: DepartureId, mode: Mode): Action[AnyContent] =
+    (identify andThen checkCancellationStatus(departureId) andThen getData(departureId) andThen requireData).async {
+
+      implicit request =>
+        form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => {
+              val json = Json.obj(
+                "form"        -> formWithErrors,
+                "lrn"         -> request.lrn,
+                "departureId" -> departureId
+              )
+              renderer.render(template, json).map(BadRequest(_))
+            },
+            value => {
+              for {
+                updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage(departureId), value))
+              } yield Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers))
+            }
+            //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
+          )
+
+    }
 }

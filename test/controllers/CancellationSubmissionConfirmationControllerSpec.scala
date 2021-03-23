@@ -21,13 +21,11 @@ import connectors.DepartureMovementConnector
 import matchers.JsonMatchers
 import models.LocalReferenceNumber
 import models.response.ResponseDeparture
-import navigation.{FakeNavigator, Navigator}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
 import play.api.test.FakeRequest
@@ -46,12 +44,6 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
       "Submitted"
     )
   }
-
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind(classOf[Navigator]).toInstance(new FakeNavigator(onwardRoute)))
-
 
   "CancellationSubmissionConfirmation Controller" - {
 
@@ -81,6 +73,38 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
       val expectedJson = Json.obj()
 
       templateCaptor.getValue mustEqual "cancellationSubmissionConfirmation.njk"
+      jsonCaptor.getValue must containJson(expectedJson)
+
+      application.stop()
+
+    }
+
+    "return Not_Found and the correct view for a GET when departure record is not found" in {
+
+      val mockConnector = mock[DepartureMovementConnector]
+
+      when(mockRenderer.render(any(), any())(any()))
+        .thenReturn(Future.successful(Html("")))
+
+      when(mockConnector.getDeparture(any())(any()))
+        .thenReturn(Future.successful(None))
+
+      val application =  guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
+
+      val request = FakeRequest(GET, routes.CancellationSubmissionConfirmationController.onPageLoad(departureId).url)
+
+      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
+
+      val result = route(application, request).value
+
+      status(result) mustEqual NOT_FOUND
+
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+
+      val expectedJson = Json.obj()
+
+      templateCaptor.getValue mustEqual "canNotCancel.njk"
       jsonCaptor.getValue must containJson(expectedJson)
 
       application.stop()

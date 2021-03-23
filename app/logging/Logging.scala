@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package navigation
+package logging
 
-import com.google.inject.Inject
-import models.UserAnswers
-import pages.Page
-import play.api.Mode
-import play.api.mvc.Call
+import play.api.Logger
 
+trait Logging {
 
-class FakeNavigator @Inject()()(desiredRoute: Call)  {
-
-      def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
-       desiredRoute
-
+  protected val logger: Logger = Logger(s"application.${this.getClass.getCanonicalName}")
 }

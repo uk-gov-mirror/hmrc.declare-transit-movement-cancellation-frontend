@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-package navigation
+package models.requests
 
-import com.google.inject.Inject
-import models.UserAnswers
-import pages.Page
-import play.api.Mode
-import play.api.mvc.Call
+import models.{EoriNumber, LocalReferenceNumber}
+import play.api.mvc.{Request, WrappedRequest}
 
-
-class FakeNavigator @Inject()()(desiredRoute: Call)  {
-
-      def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
-       desiredRoute
-
-}
+case class AuthorisedRequest[A](request: Request[A], eoriNumber: EoriNumber, lrn: LocalReferenceNumber) extends WrappedRequest[A](request)
