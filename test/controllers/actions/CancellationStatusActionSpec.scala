@@ -123,7 +123,7 @@ class CancellationStatusActionSpec extends SpecBase with BeforeAndAfterEach with
     status(result) mustEqual NOT_FOUND
     verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
     contentAsString(result) must not be ("fake ok result value")
-    templateCaptor.getValue mustEqual "canNotCancel.njk"
+    templateCaptor.getValue mustEqual "declarationNotFound.njk"
   }
 
 }
