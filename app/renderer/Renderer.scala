@@ -43,6 +43,8 @@ class Renderer @Inject()(appConfig: FrontendAppConfig, renderer: NunjucksRendere
     "betaFeedbackUnauthenticatedUrl" -> appConfig.betaFeedbackUnauthenticatedUrl,
     "serviceIdentifier"              -> appConfig.contactFormServiceIdentifier,
     "contactHost"                    -> appConfig.contactHost,
-    "signOutUrl"                     -> appConfig.signOutUrl
+    "signOutUrl"                     -> appConfig.signOutUrl,
+    "timeout"                        -> appConfig.timeoutSeconds,
+    "countdown"                      -> appConfig.countdownSeconds
   )
 }

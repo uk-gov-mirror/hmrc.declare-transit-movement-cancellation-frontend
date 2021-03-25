@@ -1,7 +1,5 @@
 $govuk-assets-path: "/common-transit-convention-cancel-departure/assets/lib/govuk-frontend/govuk/assets/";
+$hmrc-assets-path: "/common-transit-convention-cancel-departure/assets/lib/hmrc-frontend/hmrc/assets";
 
 @import "lib/govuk-frontend/govuk/all-ie8.scss";
-@import "language-toggles.scss";
-@import "partials/page-heading";
-@import "partials/header";
-@import "partials/shame";
+@import "components/timeout-dialog";

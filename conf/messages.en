@@ -167,3 +167,6 @@ canNotCancel.linkText = Back to departure declarations
 departureNotFound.title = Departure record not found
 departureNotFound.heading = Departure record not found
 departureNotFound.para1 = No departure record found for departure id
+
+keepAlive.title = keepAlive
+keepAlive.heading = keepAlive
