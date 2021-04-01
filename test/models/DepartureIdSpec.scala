@@ -26,7 +26,7 @@ class DepartureIdSpec extends SpecBase with EitherValues {
   "Departure Id" - {
     "must bind from url" in {
       val pathBindable = implicitly[PathBindable[DepartureId]]
-      val departureId    = DepartureId(12)
+      val departureId  = DepartureId(12)
 
       val bind: Either[String, DepartureId] = pathBindable.bind("departureId", "12")
       bind.right.value mustBe departureId
@@ -34,7 +34,7 @@ class DepartureIdSpec extends SpecBase with EitherValues {
 
     "unbind to path value" in {
       val pathBindable = implicitly[PathBindable[DepartureId]]
-      val departureId    = DepartureId(12)
+      val departureId  = DepartureId(12)
 
       val bindValue = pathBindable.unbind("departureId", departureId)
       bindValue mustBe "12"

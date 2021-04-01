@@ -28,7 +28,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) extends Logging {
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
@@ -41,7 +40,7 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
 
     http.GET[HttpResponse](serviceUrl)(httpReads, header, ec) map {
       case responseMessage if is2xx(responseMessage.status) =>
-          Option(responseMessage.json.as[ResponseDeparture])
+        Option(responseMessage.json.as[ResponseDeparture])
       case _ =>
         logger.error("getDeparture failed to return data")
         None

@@ -17,15 +17,15 @@
 package models.response
 
 import models.LocalReferenceNumber
-import play.api.libs.json.{Reads, __}
+import play.api.libs.json.{__, Reads}
 
-case class ResponseDeparture(localReferenceNumber: LocalReferenceNumber, status:String)
+case class ResponseDeparture(localReferenceNumber: LocalReferenceNumber, status: String)
 import play.api.libs.functional.syntax._
 
 object ResponseDeparture {
   implicit val reads: Reads[ResponseDeparture] = (
-      (__ \ "referenceNumber").read[LocalReferenceNumber] and
+    (__ \ "referenceNumber").read[LocalReferenceNumber] and
       (__ \ "status").read[String]
-    )(ResponseDeparture.apply _)
+  )(ResponseDeparture.apply _)
 
 }

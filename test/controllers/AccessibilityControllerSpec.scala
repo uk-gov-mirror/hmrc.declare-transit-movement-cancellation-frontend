@@ -26,7 +26,7 @@ import play.twirl.api.Html
 
 import scala.concurrent.Future
 
-class AccessibilityControllerSpec extends SpecBase  with MockNunjucksRendererApp {
+class AccessibilityControllerSpec extends SpecBase with MockNunjucksRendererApp {
 
   "Accessibility Controller" - {
 

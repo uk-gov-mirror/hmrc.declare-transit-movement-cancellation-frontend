@@ -16,11 +16,11 @@
 
 package forms.mappings
 
+import models.Enumerable
 import org.scalatest.OptionValues
 import org.scalatest.freespec.AnyFreeSpec
-import play.api.data.{Form, FormError}
-import models.Enumerable
 import org.scalatest.matchers.must.Matchers
+import play.api.data.{Form, FormError}
 
 object MappingsSpec {
 
@@ -64,7 +64,7 @@ class MappingsSpec extends AnyFreeSpec with Matchers with OptionValues with Mapp
     }
 
     "must return a custom error message" in {
-      val form = Form("value" -> text("custom.error"))
+      val form   = Form("value" -> text("custom.error"))
       val result = form.bind(Map("value" -> ""))
       result.errors must contain(FormError("value", "custom.error"))
     }

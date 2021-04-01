@@ -29,27 +29,30 @@ class Navigator @Inject()(val appConfig: FrontendAppConfig) {
   private val viewDepartures = s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
   protected def normalRoutes: PartialFunction[Page, UserAnswers => Option[Call]] = {
 
-    case ConfirmCancellationPage(departureId) => ua => Some(confirmCancellationRoute(ua,  departureId))
-    case CancellationReasonPage(departureId)  => ua =>  Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
+    case ConfirmCancellationPage(departureId) =>
+      ua =>
+        Some(confirmCancellationRoute(ua, departureId))
+    case CancellationReasonPage(departureId) =>
+      ua =>
+        Some(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
   }
 
-   def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Call = {
-     ua.get(ConfirmCancellationPage(departureId)) match {
-       case Some(true) => routes.CancellationReasonController.onPageLoad(departureId)
-       case Some(false) => Call("GET", viewDepartures)
+  def confirmCancellationRoute(ua: UserAnswers, departureId: DepartureId): Call =
+    ua.get(ConfirmCancellationPage(departureId)) match {
+      case Some(true)  => routes.CancellationReasonController.onPageLoad(departureId)
+      case Some(false) => Call("GET", viewDepartures)
     }
-  }
 
   private def handleCall(userAnswers: UserAnswers, call: UserAnswers => Option[Call]) =
     call(userAnswers) match {
       case Some(onwardRoute) => onwardRoute
-      case None => routes.SessionExpiredController.onPageLoad()
+      case None              => routes.SessionExpiredController.onPageLoad()
     }
 
   def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call = mode match {
     case NormalMode =>
       normalRoutes.lift(page) match {
-        case None => routes.IndexController.onPageLoad()
+        case None       => routes.IndexController.onPageLoad()
         case Some(call) => handleCall(userAnswers, call)
       }
   }

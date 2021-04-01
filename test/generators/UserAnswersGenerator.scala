@@ -28,8 +28,8 @@ trait UserAnswersGenerator extends UserAnswersEntryGenerators with TryValues {
 
   val generators: Seq[Gen[(QuestionPage[_], JsValue)]] =
     arbitrary[(ConfirmCancellationPage, JsValue)] ::
-    arbitrary[(CancellationReasonPage, JsValue)] ::
-    Nil
+      arbitrary[(CancellationReasonPage, JsValue)] ::
+      Nil
 
   implicit lazy val arbitraryUserData: Arbitrary[UserAnswers] = {
 

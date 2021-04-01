@@ -44,7 +44,7 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
 
   private val departuresResponseJson = Json.obj(
     "referenceNumber" -> "lrn",
-    "status" -> "Submitted"
+    "status"          -> "Submitted"
   )
 
   val errorResponses: Gen[Int] = Gen.chooseNum(400, 599)

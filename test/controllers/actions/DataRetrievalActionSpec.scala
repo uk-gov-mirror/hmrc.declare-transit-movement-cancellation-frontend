@@ -18,7 +18,7 @@ package controllers.actions
 
 import base.SpecBase
 import generators.Generators
-import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
+import models.requests.{AuthorisedRequest, OptionalDataRequest}
 import models.{DepartureId, EoriNumber, LocalReferenceNumber, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._

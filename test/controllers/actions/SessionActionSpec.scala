@@ -26,7 +26,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SessionActionSpec extends SpecBase with MockNunjucksRendererApp {
 
   class Harness(action: IdentifierAction) {
-    def onPageLoad() = action { request => Results.Ok }
+
+    def onPageLoad() = action {
+      request =>
+        Results.Ok
+    }
   }
 
   "Session Action" - {

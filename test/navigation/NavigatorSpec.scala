@@ -25,11 +25,11 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import pages._
 
-class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generators  {
+class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   val appConfig = app.injector.instanceOf[FrontendAppConfig]
 
-  private val navigator: Navigator = new Navigator(appConfig)
+  private val navigator: Navigator   = new Navigator(appConfig)
   private val viewDepartures: String = s"${frontendAppConfig.manageTransitMovementsViewDeparturesUrl}"
 
   "Navigator" - {
@@ -40,7 +40,7 @@ class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generat
       forAll(arbitrary[UserAnswers]) {
         answers =>
           navigator
-            .nextPage(UnknownPage,NormalMode,  answers)
+            .nextPage(UnknownPage, NormalMode, answers)
             .mustBe(routes.IndexController.onPageLoad())
 
       }
@@ -53,7 +53,7 @@ class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generat
             .success
             .value
           navigator
-            .nextPage(ConfirmCancellationPage(departureId), NormalMode,  updatedAnswers)
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
             .mustBe(routes.CancellationReasonController.onPageLoad(departureId))
       }
     }
@@ -66,8 +66,9 @@ class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generat
             .success
             .value
           navigator
-            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers).url
-            .mustBe (viewDepartures)
+            .nextPage(ConfirmCancellationPage(departureId), NormalMode, updatedAnswers)
+            .url
+            .mustBe(viewDepartures)
       }
     }
 
@@ -80,7 +81,7 @@ class NavigatorSpec  extends SpecBase with ScalaCheckPropertyChecks with Generat
             .value
           navigator
             .nextPage(CancellationReasonPage(departureId), NormalMode, updatedAnswers)
-            .mustBe (routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
+            .mustBe(routes.CancellationSubmissionConfirmationController.onPageLoad(departureId))
       }
     }
   }

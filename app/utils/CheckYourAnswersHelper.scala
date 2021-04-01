@@ -30,8 +30,8 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messag
   def cancellationReason(departureId: DepartureId): Option[Row] = userAnswers.get(CancellationReasonPage(departureId)) map {
     answer =>
       Row(
-        key     = Key(msg"cancellationReason.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
-        value   = Value(lit"$answer"),
+        key   = Key(msg"cancellationReason.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(lit"$answer"),
         actions = List(
           Action(
             content            = msg"site.edit",
@@ -45,8 +45,8 @@ class CheckYourAnswersHelper(userAnswers: UserAnswers)(implicit messages: Messag
   def confirmCancellation(departureId: DepartureId): Option[Row] = userAnswers.get(ConfirmCancellationPage(departureId)) map {
     answer =>
       Row(
-        key     = Key(msg"confirmCancellation.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
-        value   = Value(yesOrNo(answer)),
+        key   = Key(msg"confirmCancellation.checkYourAnswersLabel", classes = Seq("govuk-!-width-one-half")),
+        value = Value(yesOrNo(answer)),
         actions = List(
           Action(
             content            = msg"site.edit",

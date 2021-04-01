@@ -44,8 +44,6 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
   lazy val cancellationReasonRoute = routes.CancellationReasonController.onPageLoad(departureId).url
 
-
-
   "CancellationReason Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -69,7 +67,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       val expectedJson = Json.obj(
         "form"        -> form,
-        "lrn" -> LocalReferenceNumber(""),
+        "lrn"         -> LocalReferenceNumber(""),
         "departureId" -> departureId
       )
 
@@ -147,7 +145,7 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
       val expectedJson = Json.obj(
         "form"        -> boundForm,
         "departureId" -> departureId,
-        "lrn" -> LocalReferenceNumber("")
+        "lrn"         -> LocalReferenceNumber("")
       )
 
       templateCaptor.getValue mustEqual template

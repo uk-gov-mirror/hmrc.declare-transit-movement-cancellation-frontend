@@ -19,9 +19,9 @@ package generators
 import models._
 import org.scalacheck.Arbitrary
 
-trait ModelGenerators extends UserAnswersEntryGenerators  {
+trait ModelGenerators extends UserAnswersEntryGenerators {
 
-self: Generators =>
+  self: Generators =>
 
   implicit lazy val arbitraryDepartureId: Arbitrary[DepartureId] =
     Arbitrary {

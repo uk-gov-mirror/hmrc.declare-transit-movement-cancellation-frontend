@@ -54,17 +54,23 @@ class CancellationStatusAction(
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
     departureMovementConnector.getDeparture(departureId).flatMap {
       case Some(responseDeparture: ResponseDeparture) if !validStatus.contains(responseDeparture.status) =>
-        renderer.render("canNotCancel.njk", Json.obj(
-          "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
-        ))(request).map(html => Left(BadRequest(html)))
+        renderer
+          .render("canNotCancel.njk",
+                  Json.obj(
+                    "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+                  ))(request)
+          .map(html => Left(BadRequest(html)))
 
       case Some(responseDeparture: ResponseDeparture) if validStatus.contains(responseDeparture.status) =>
         Future.successful(Right(AuthorisedRequest(request.request, request.eoriNumber, responseDeparture.localReferenceNumber)))
 
       case None =>
-        renderer.render("declarationNotFound.njk", Json.obj(
-          "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
-        ))(request).map(html => Left(NotFound(html)))
+        renderer
+          .render("declarationNotFound.njk",
+                  Json.obj(
+                    "departureList" -> s"${appConfig.manageTransitMovementsViewDeparturesUrl}"
+                  ))(request)
+          .map(html => Left(NotFound(html)))
 
     }
   }

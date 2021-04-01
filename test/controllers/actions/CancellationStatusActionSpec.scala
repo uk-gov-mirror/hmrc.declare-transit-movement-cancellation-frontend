@@ -22,8 +22,8 @@ import models.requests.IdentifierRequest
 import models.response.ResponseDeparture
 import models.{DepartureId, EoriNumber, LocalReferenceNumber}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.{ArgumentCaptor, Mockito}
 import org.mockito.Mockito.{times, verify, when}
+import org.mockito.{ArgumentCaptor, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.JsObject
 import play.api.mvc.Results._

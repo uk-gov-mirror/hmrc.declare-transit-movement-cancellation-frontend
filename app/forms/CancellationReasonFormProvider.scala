@@ -23,7 +23,6 @@ import play.api.data.Form
 
 class CancellationReasonFormProvider @Inject() extends Mappings {
 
-
   def apply(): Form[String] =
     Form(
       "value" -> text("cancellationReason.error.required")

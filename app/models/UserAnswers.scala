@@ -24,11 +24,11 @@ import queries.{Gettable, Settable}
 import scala.util.{Failure, Success, Try}
 
 final case class UserAnswers(
-                              id: DepartureId,
-                              eoriNumber: EoriNumber,
-                              data: JsObject = Json.obj(),
-                              lastUpdated: LocalDateTime = LocalDateTime.now
-                            ) {
+  id: DepartureId,
+  eoriNumber: EoriNumber,
+  data: JsObject             = Json.obj(),
+  lastUpdated: LocalDateTime = LocalDateTime.now
+) {
 
   def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(page.path)).reads(data).getOrElse(None)
@@ -44,7 +44,7 @@ final case class UserAnswers(
 
     updatedData.flatMap {
       d =>
-        val updatedAnswers = copy (data = d)
+        val updatedAnswers = copy(data = d)
         page.cleanup(Some(value), updatedAnswers)
     }
   }
@@ -60,7 +60,7 @@ final case class UserAnswers(
 
     updatedData.flatMap {
       d =>
-        val updatedAnswers = copy (data = d)
+        val updatedAnswers = copy(data = d)
         page.cleanup(None, updatedAnswers)
     }
   }
@@ -74,10 +74,10 @@ object UserAnswers {
 
     (
       (__ \ "_id").read[DepartureId] and
-      (__ \ "eoriNumber").read[EoriNumber] and
-      (__ \ "data").read[JsObject] and
-      (__ \ "lastUpdated").read(MongoDateTimeFormats.localDateTimeRead)
-    ) (UserAnswers.apply _)
+        (__ \ "eoriNumber").read[EoriNumber] and
+        (__ \ "data").read[JsObject] and
+        (__ \ "lastUpdated").read(MongoDateTimeFormats.localDateTimeRead)
+    )(UserAnswers.apply _)
   }
 
   implicit lazy val writes: OWrites[UserAnswers] = {
@@ -86,9 +86,9 @@ object UserAnswers {
 
     (
       (__ \ "_id").write[DepartureId] and
-      (__ \ "eoriNumber").write[EoriNumber] and
-      (__ \ "data").write[JsObject] and
-      (__ \ "lastUpdated").write(MongoDateTimeFormats.localDateTimeWrite)
-    ) (unlift(UserAnswers.unapply))
+        (__ \ "eoriNumber").write[EoriNumber] and
+        (__ \ "data").write[JsObject] and
+        (__ \ "lastUpdated").write(MongoDateTimeFormats.localDateTimeWrite)
+    )(unlift(UserAnswers.unapply))
   }
 }

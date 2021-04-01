@@ -17,13 +17,12 @@
 package controllers.actions
 
 import com.google.inject.Singleton
-
-import javax.inject.Inject
-import models.{DepartureId, LocalReferenceNumber}
-import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
+import models.DepartureId
+import models.requests.{AuthorisedRequest, OptionalDataRequest}
 import play.api.mvc.ActionTransformer
 import repositories.SessionRepository
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -39,14 +38,14 @@ trait DataRetrievalActionProvider {
 }
 
 class DataRetrievalAction(
-                           departureId: DepartureId,
-                           implicit protected val executionContext: ExecutionContext,
-                           sessionRepository: SessionRepository
-                         ) extends ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
+  departureId: DepartureId,
+  implicit protected val executionContext: ExecutionContext,
+  sessionRepository: SessionRepository
+) extends ActionTransformer[AuthorisedRequest, OptionalDataRequest] {
 
   override protected def transform[A](request: AuthorisedRequest[A]): Future[OptionalDataRequest[A]] =
     sessionRepository.get(departureId, request.eoriNumber).map {
       userAnswers =>
-        OptionalDataRequest(request.request, request.eoriNumber,request.lrn, userAnswers)
+        OptionalDataRequest(request.request, request.eoriNumber, request.lrn, userAnswers)
     }
 }
