@@ -19,7 +19,7 @@ package pages
 import models.DepartureId
 import pages.behaviours.PageBehaviours
 
-class ConfirmCancellationPageSpec(departure:DepartureId) extends PageBehaviours {
+class ConfirmCancellationPageSpec(departure: DepartureId) extends PageBehaviours {
 
   "ConfirmCancellationPage" - {
 

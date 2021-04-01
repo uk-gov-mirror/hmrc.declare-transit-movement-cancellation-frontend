@@ -57,12 +57,12 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
       when(mockConnector.getDeparture(any())(any()))
         .thenReturn(Future.successful(Some(mockDepartureResponse)))
 
-      val application =  guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
+      val application = guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
 
       val request = FakeRequest(GET, routes.CancellationSubmissionConfirmationController.onPageLoad(departureId).url)
 
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
+      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 
@@ -89,12 +89,12 @@ class CancellationSubmissionConfirmationControllerSpec extends SpecBase with Moc
       when(mockConnector.getDeparture(any())(any()))
         .thenReturn(Future.successful(None))
 
-      val application =  guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
+      val application = guiceApplicationBuilder().overrides(bind[DepartureMovementConnector].toInstance(mockConnector)).build()
 
       val request = FakeRequest(GET, routes.CancellationSubmissionConfirmationController.onPageLoad(departureId).url)
 
       val templateCaptor = ArgumentCaptor.forClass(classOf[String])
-      val jsonCaptor = ArgumentCaptor.forClass(classOf[JsObject])
+      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
 
       val result = route(application, request).value
 

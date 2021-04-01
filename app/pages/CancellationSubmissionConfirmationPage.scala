@@ -17,6 +17,5 @@
 package pages
 
 import models.DepartureId
-import play.api.libs.json.JsPath
 
 case class CancellationSubmissionConfirmationPage(departureId: DepartureId) extends Page()

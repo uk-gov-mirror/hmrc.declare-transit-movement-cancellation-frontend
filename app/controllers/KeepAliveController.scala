@@ -25,10 +25,10 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class KeepAliveController @Inject()(
-                                     identify: IdentifierAction,
-                                     val controllerComponents: MessagesControllerComponents
-                                   )(implicit ec: ExecutionContext)
-  extends FrontendBaseController
+  identify: IdentifierAction,
+  val controllerComponents: MessagesControllerComponents
+)(implicit ec: ExecutionContext)
+    extends FrontendBaseController
     with I18nSupport {
 
   def keepAlive: Action[AnyContent] =

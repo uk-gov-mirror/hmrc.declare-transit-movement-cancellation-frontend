@@ -35,7 +35,7 @@ object EnumerableSpec {
   }
 }
 
-class EnumerableSpec extends SpecBase  with EitherValues with OptionValues with Enumerable.Implicits {
+class EnumerableSpec extends SpecBase with EitherValues with OptionValues with Enumerable.Implicits {
 
   import EnumerableSpec._
 

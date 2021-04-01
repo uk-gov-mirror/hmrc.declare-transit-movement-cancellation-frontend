@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions._
 import forms.CancellationReasonFormProvider
-import models.{DepartureId, Mode, UserAnswers}
+import models.{DepartureId, Mode}
 import navigation.Navigator
 import pages.CancellationReasonPage
 import play.api.i18n.{I18nSupport, MessagesApi}

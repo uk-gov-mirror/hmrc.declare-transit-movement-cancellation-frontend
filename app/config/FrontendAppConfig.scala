@@ -23,34 +23,34 @@ import play.api.i18n.Lang
 import play.api.mvc.Call
 
 @Singleton
-class FrontendAppConfig @Inject() (configuration: Configuration) {
+class FrontendAppConfig @Inject()(configuration: Configuration) {
 
-  val contactHost: String = configuration.get[String]("contact-frontend.host")
+  val contactHost: String                  = configuration.get[String]("contact-frontend.host")
   val contactFormServiceIdentifier: String = "CTCTrader"
 
   val trackingConsentUrl: String = configuration.get[String]("microservice.services.tracking-consent-frontend.url")
   val gtmContainer: String       = configuration.get[String]("microservice.services.tracking-consent-frontend.gtm.container")
 
-  val analyticsToken: String = configuration.get[String](s"google-analytics.token")
-  val analyticsHost: String = configuration.get[String](s"google-analytics.host")
-  val betaFeedbackUrl = s"$contactHost/contact/beta-feedback"
+  val analyticsToken: String         = configuration.get[String](s"google-analytics.token")
+  val analyticsHost: String          = configuration.get[String](s"google-analytics.host")
+  val betaFeedbackUrl                = s"$contactHost/contact/beta-feedback"
   val betaFeedbackUnauthenticatedUrl = s"$contactHost/contact/beta-feedback-unauthenticated"
   val signOutUrl: String             = configuration.get[String]("urls.logoutContinue") + configuration.get[String]("urls.feedback")
 
-  lazy val authUrl: String = configuration.get[Service]("auth").baseUrl
-  lazy val loginUrl: String = configuration.get[String]("urls.login")
-  lazy val loginContinueUrl: String = configuration.get[String]("urls.loginContinue")
-  lazy val enrolmentKey: String       = configuration.get[String]("microservice.services.auth.enrolmentKey")
+  lazy val authUrl: String                = configuration.get[Service]("auth").baseUrl
+  lazy val loginUrl: String               = configuration.get[String]("urls.login")
+  lazy val loginContinueUrl: String       = configuration.get[String]("urls.loginContinue")
+  lazy val enrolmentKey: String           = configuration.get[String]("microservice.services.auth.enrolmentKey")
   lazy val enrolmentIdentifierKey: String = configuration.get[String]("microservice.services.auth.enrolmentIdentifierKey")
 
-  lazy val manageTransitMovementsUrl: String             = configuration.get[String]("urls.manageTransitMovementsFrontend")
+  lazy val manageTransitMovementsUrl: String               = configuration.get[String]("urls.manageTransitMovementsFrontend")
   lazy val manageTransitMovementsViewDeparturesUrl: String = s"$manageTransitMovementsUrl/test-only/view-departures"
 
-  lazy val departureBaseUrl: String   = configuration.get[Service]("microservice.services.departures").baseUrl
-  lazy val departureUrl: String       = configuration.get[Service]("microservice.services.departures").fullServiceUrl
+  lazy val departureBaseUrl: String = configuration.get[Service]("microservice.services.departures").baseUrl
+  lazy val departureUrl: String     = configuration.get[Service]("microservice.services.departures").fullServiceUrl
 
-  lazy val timeoutSeconds: String                      = configuration.get[String]("session.timeoutSeconds")
-  lazy val countdownSeconds: String                    = configuration.get[String]("session.countdownSeconds")
+  lazy val timeoutSeconds: String   = configuration.get[String]("session.timeoutSeconds")
+  lazy val countdownSeconds: String = configuration.get[String]("session.countdownSeconds")
 
   lazy val languageTranslationEnabled: Boolean =
     configuration.get[Boolean]("microservice.services.features.welsh-translation")

@@ -25,7 +25,7 @@ import wolfendale.scalacheck.regexp.RegexpGen
 class CancellationReasonFormProviderSpec extends StringFieldBehaviours {
 
   val requiredKey = "cancellationReason.error.required"
-  val lengthKey = "cancellationReason.error.length"
+  val lengthKey   = "cancellationReason.error.length"
 
   val form = new CancellationReasonFormProvider()()
 

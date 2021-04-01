@@ -33,12 +33,11 @@ trait UserAnswersEntryGenerators extends PageGenerators {
       } yield (page, value)
     }
 
-
   implicit lazy val arbitraryConfirmCancellationUserAnswersEntry: Arbitrary[(ConfirmCancellationPage, JsValue)] =
     Arbitrary {
       for {
-        page  <-arbitrary[ConfirmCancellationPage]
+        page  <- arbitrary[ConfirmCancellationPage]
         value <- arbitrary[Boolean].map(Json.toJson(_))
-              } yield (page, value)
+      } yield (page, value)
     }
 }

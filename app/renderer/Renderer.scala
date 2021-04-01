@@ -17,15 +17,15 @@
 package renderer
 
 import config.FrontendAppConfig
-import javax.inject.Inject
 import play.api.libs.json.{JsObject, Json, OWrites}
 import play.api.mvc.RequestHeader
 import play.twirl.api.Html
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
+import javax.inject.Inject
 import scala.concurrent.Future
 
-class Renderer @Inject()(frontendAppConfig:FrontendAppConfig, appConfig: FrontendAppConfig, renderer: NunjucksRenderer) {
+class Renderer @Inject()(frontendAppConfig: FrontendAppConfig, appConfig: FrontendAppConfig, renderer: NunjucksRenderer) {
 
   def render(template: String)(implicit request: RequestHeader): Future[Html] =
     renderTemplate(template, Json.obj())

@@ -22,10 +22,9 @@ import pages.Page
 import play.api.Mode
 import play.api.mvc.Call
 
+class FakeNavigator @Inject()()(desiredRoute: Call) {
 
-class FakeNavigator @Inject()()(desiredRoute: Call)  {
-
-      def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
-       desiredRoute
+  def nextPage(page: Page, mode: Mode, userAnswers: UserAnswers): Call =
+    desiredRoute
 
 }

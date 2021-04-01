@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
+import models.requests.{AuthorisedRequest, OptionalDataRequest}
 import models.{DepartureId, LocalReferenceNumber, UserAnswers}
 import play.api.mvc.ActionTransformer
 

@@ -19,5 +19,4 @@ package models
 object Constants {
   val stringFieldRegex = "[\\sa-zA-Z0-9&'@/.\\-? ]*"
   val commentMaxLength = 350
-
 }

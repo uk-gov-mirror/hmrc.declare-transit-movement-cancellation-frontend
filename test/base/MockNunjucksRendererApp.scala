@@ -17,8 +17,8 @@
 package base
 
 import controllers.actions._
-import models.{DepartureId, LocalReferenceNumber, UserAnswers}
 import models.requests.{AuthorisedRequest, IdentifierRequest, OptionalDataRequest}
+import models.{LocalReferenceNumber, UserAnswers}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.when
@@ -29,7 +29,7 @@ import play.api.Application
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{ActionFilter, ActionRefiner, ActionTransformer, Result}
+import play.api.mvc.{ActionRefiner, ActionTransformer, Result}
 import play.api.test.Helpers
 import repositories.SessionRepository
 import uk.gov.hmrc.nunjucks.NunjucksRenderer

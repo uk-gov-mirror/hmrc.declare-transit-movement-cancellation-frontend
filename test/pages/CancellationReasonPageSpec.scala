@@ -19,8 +19,7 @@ package pages
 import models.DepartureId
 import pages.behaviours.PageBehaviours
 
-
-class CancellationReasonPageSpec(departure:DepartureId) extends PageBehaviours {
+class CancellationReasonPageSpec(departure: DepartureId) extends PageBehaviours {
 
   "CancellationReasonPage" - {
 

@@ -43,7 +43,6 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
   lazy val confirmCancellationRoute = routes.ConfirmCancellationController.onPageLoad(departureId).url
 
-
   "ConfirmCancellation Controller" - {
 
     "must return OK and the correct view for a GET" in {
@@ -67,11 +66,10 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       val expectedJson = Json.obj(
         "form"        -> form,
-        "lrn" -> LocalReferenceNumber(""),
+        "lrn"         -> LocalReferenceNumber(""),
         "departureId" -> departureId,
         "radios"      -> Radios.yesNo(form("value"))
       )
-
 
       templateCaptor.getValue mustEqual template
       jsonCaptor.getValue must containJson(expectedJson)
@@ -163,7 +161,7 @@ class ConfirmCancellationControllerSpec extends SpecBase with NunjucksSupport wi
 
       val expectedJson = Json.obj(
         "form"        -> boundForm,
-        "lrn" -> LocalReferenceNumber(""),
+        "lrn"         -> LocalReferenceNumber(""),
         "departureId" -> departureId,
         "radios"      -> Radios.yesNo(boundForm("value"))
       )

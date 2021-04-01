@@ -24,7 +24,7 @@ final case class LocalReferenceNumber(value: String) {
 
 object LocalReferenceNumber {
 
-  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map (LocalReferenceNumber.apply)
+  implicit val reads: Reads[LocalReferenceNumber] = __.read[String].map(LocalReferenceNumber.apply)
 
   implicit def writes: Writes[LocalReferenceNumber] = Writes {
     lrn =>
