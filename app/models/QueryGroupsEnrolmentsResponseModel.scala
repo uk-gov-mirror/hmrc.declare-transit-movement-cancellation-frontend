@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package navigation
+package models
 
-import com.google.inject.Inject
-import models.{Mode, NormalMode, UserAnswers}
-import pages.Page
-import play.api.Mode
-import play.api.mvc.Call
+import play.api.libs.json.Json
 
-class FakeNavigator(desiredRoute: Call)  {
+case class QueryGroupsEnrolmentsResponseModel(enrolments: Seq[Service])
 
-  def nextPage(page: Page, userAnswers: UserAnswers): Call =
-    desiredRoute
+case class Service(service: String)
 
+object QueryGroupsEnrolmentsResponseModel {
+  implicit val enrolmentReads             = Json.format[Service]
+  implicit val queryGroupsEnrolmentsReads = Json.format[QueryGroupsEnrolmentsResponseModel]
 }
