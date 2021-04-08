@@ -45,6 +45,7 @@ class NavigatorSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
 
       }
     }
+
     "Must go from ConfirmCancellationPage to CancellationReason page when user selects yes" in {
       forAll(arbitrary[UserAnswers]) {
         answers =>
