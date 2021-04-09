@@ -21,16 +21,23 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import generators.Generators
 import helper.WireMockServerHandler
 import models.LocalReferenceNumber
-import models.response.ResponseDeparture
+import models.messages.CancellationRequest
+import models.response.errors.{InvalidStatus, MalformedBody}
+import models.response.{MRNAllocatedMessage, MRNAllocatedRootLevel, Message, Messages, PrincipalTraderDetails, ResponseDeparture}
 import org.scalacheck.Gen
+import org.scalatest.EitherValues
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.Application
+import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.test.Helpers
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.http.logging.Authorization
 
-class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators {
+import java.time.LocalDate
+
+class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators with EitherValues {
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
   private lazy val connector: DepartureMovementConnector =
@@ -85,5 +92,169 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
       }
     }
 
+    "getMessages" - {
+      val mrnAllocatedMessage = <CC028B>
+        <SynIdeMES1>SynIdeMES1</SynIdeMES1>
+        <SynVerNumMES2>SynVerNumMES2</SynVerNumMES2>
+        <MesSenMES3>MesSenMES3</MesSenMES3>
+        <SenIdeCodQuaMES4>SenIdeCodQuaMES4</SenIdeCodQuaMES4>
+        <MesRecMES6>MesRecMES6</MesRecMES6>
+        <RecIdeCodQuaMES7>RecIdeCodQuaMES7</RecIdeCodQuaMES7>
+        <DatOfPreMES9>DatOfPreMES9</DatOfPreMES9>
+        <TimOfPreMES10>TimOfPreMES10</TimOfPreMES10>
+        <IntConRefMES11>IntConRefMES11</IntConRefMES11>
+        <RecRefMES12>RecRefMES12</RecRefMES12>
+        <AppRefMES14>AppRefMES14</AppRefMES14>
+        <AckReqMES16>AckReqMES16</AckReqMES16>
+        <ComAgrIdMES17>ComAgrIdMES17</ComAgrIdMES17>
+        <TesIndMES18>TesIndMES18</TesIndMES18>
+        <MesIdeMES19>MesIdeMES19</MesIdeMES19>
+        <MesTypMES20>MesTypMES20</MesTypMES20>
+        <ComAccRefMES21>ComAccRefMES21</ComAccRefMES21>
+        <FirAndLasTraMES23>FirAndLasTraMES23</FirAndLasTraMES23>
+        <HEAHEA>
+          <RefNumHEA4>lrn</RefNumHEA4>
+          <DocNumHEA5>mrn</DocNumHEA5>
+          <AccDatHEA158>12122020</AccDatHEA158>
+        </HEAHEA>
+        <TRAPRIPC1>
+          <NamPC17>name</NamPC17>
+          <StrAndNumPC122>street</StrAndNumPC122>
+          <PosCodPC123>xx11xx</PosCodPC123>
+          <CitPC124>city</CitPC124>
+          <CouPC125>GB</CouPC125>
+          <NADLNGPC>EN</NADLNGPC>
+          <TINPC159>eori</TINPC159>
+          <HITPC126>holder tir</HITPC126>
+        </TRAPRIPC1>
+        <CUSOFFDEPEPT>
+          <RefNumEPT1>AB12345C</RefNumEPT1>
+        </CUSOFFDEPEPT>
+      </CC028B>
+
+      "must return a successful future response" in {
+        val messagesResponseJson = Json.obj(
+          "messages" -> Json.arr(
+            Json.obj("messageType" -> "IE007", "message" -> "<CC007B></CC007B>"),
+            Json.obj("messageType" -> "IE028", "message" -> mrnAllocatedMessage.toString()),
+          )
+        )
+
+        val expectedResult = Messages(
+          Seq(
+            Message("IE007", <CC007B></CC007B>),
+            Message("IE028", mrnAllocatedMessage)
+          )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+            .withHeader("Channel", containing("web"))
+            .willReturn(okJson(messagesResponseJson.toString()))
+        )
+
+        connector.getMessages(departureId).futureValue mustBe Right(expectedResult)
+      }
+
+      "must return Left MalformedBody if messages json is malformed" in {
+        val messagesResponseJson = Json.obj(
+          "messages" -> Json.arr(
+            Json.obj("messageType" -> "IE007", "mege" -> "<CC007B></CC007B>"),
+          )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+            .withHeader("Channel", containing("web"))
+            .willReturn(okJson(messagesResponseJson.toString()))
+        )
+
+        connector.getMessages(departureId).futureValue mustBe Left(MalformedBody)
+      }
+
+      "must return a None when an error response is returned from getDepartures" in {
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+                .withHeader("Channel", containing("web"))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+            connector.getMessages(departureId).futureValue mustBe Left(InvalidStatus(errorResponse))
+        }
+      }
+    }
+    "submitCancellation" - {
+
+      val cancellationRequest: CancellationRequest = {
+        CancellationRequest(
+          MRNAllocatedRootLevel(
+            "SynIdeMES1",
+            "SynVerNumMES2",
+            "MesSenMES3",
+            Some("SenIdeCodQuaMES4"),
+            "MesRecMES6",
+            Some("RecIdeCodQuaMES7"),
+            "DatOfPreMES9",
+            "TimOfPreMES10",
+            "IntConRefMES11",
+            Some("RecRefMES12"),
+            Some("RecRefQAMES12"),
+            "AppRefMES14",
+            Some("PriMES15"),
+            Some("AckReqMES16"),
+            Some("ComAgrIdMES17"),
+            Some("TesIndMES18"),
+            "MesIdeMES19",
+            "MesTypMES20",
+            Some("ComAckRef"),
+            Some("MesSeqNum"),
+            None
+          ),
+          "mrn",
+          LocalDate.now(),
+          "just cause",
+          PrincipalTraderDetails(Some("name"), Some("street"), Some("xx11xx"), Some("city"), Some("GB"), Some("EN"), Some("eori"), Some("holder tir")),
+          "123456"
+        )
+      }
+
+      "must return a successful future response" in {
+
+        val request = cancellationRequest
+
+        server.stubFor(
+          post(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+            .withHeader("Channel", containing("web"))
+            .withHeader(HeaderNames.CONTENT_TYPE, containing("application/xml"))
+            .willReturn(status(Helpers.ACCEPTED))
+        )
+
+        connector.submitCancellation(departureId, request).futureValue.isRight mustBe true
+      }
+
+      "must return  InvalidStatus when an error response is returned from submitCancellation" in {
+
+        val request = cancellationRequest
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              post(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+                .withHeader("Channel", containing("web"))
+                .withHeader(HeaderNames.CONTENT_TYPE, containing("application/xml"))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+            connector.submitCancellation(departureId, request).futureValue mustBe Left(InvalidStatus(errorResponse))
+        }
+      }
+    }
   }
 }

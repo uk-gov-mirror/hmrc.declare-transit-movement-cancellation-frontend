@@ -32,6 +32,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{ActionRefiner, ActionTransformer, Result}
 import play.api.test.Helpers
 import repositories.SessionRepository
+import services.CancellationSubmissionService
 import uk.gov.hmrc.nunjucks.NunjucksRenderer
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,6 +41,8 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
   self: TestSuite =>
 
   val mockRenderer: NunjucksRenderer = mock[NunjucksRenderer]
+
+  val mockSubmissionService: CancellationSubmissionService = mock[CancellationSubmissionService]
 
   val mockDataRetrievalActionProvider: DataRetrievalActionProvider = mock[DataRetrievalActionProvider]
 
@@ -104,6 +107,7 @@ trait MockNunjucksRendererApp extends GuiceOneAppPerSuite with BeforeAndAfterEac
         bind[CheckCancellationStatusProvider].toInstance(mockCheckCancellationStatusProvider),
         bind[NunjucksRenderer].toInstance(mockRenderer),
         bind[MessagesApi].toInstance(Helpers.stubMessagesApi()),
+        bind[CancellationSubmissionService].toInstance(mockSubmissionService),
         bind[SessionRepository].toInstance(mockSessionRepository)
       )
 
