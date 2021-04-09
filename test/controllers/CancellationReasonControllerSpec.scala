@@ -20,6 +20,7 @@ import base.{MockNunjucksRendererApp, SpecBase}
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
 import models.LocalReferenceNumber
+import models.response.errors.InvalidState
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -27,9 +28,10 @@ import org.scalatestplus.mockito.MockitoSugar
 import pages.CancellationReasonPage
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.Call
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import play.twirl.api.Html
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
 import scala.concurrent.Future
@@ -47,7 +49,6 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
   "CancellationReason Controller" - {
 
     "must return OK and the correct view for a GET" in {
-
       checkCancellationStatus()
 
       when(mockRenderer.render(any(), any())(any()))
@@ -109,6 +110,9 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       when(mockSessionRepository.set(any())) thenReturn Future.successful(true)
 
+      when(mockSubmissionService.submitCancellation(any())(any()))
+        .thenReturn(Future.successful(Right(HttpResponse(Helpers.ACCEPTED, ""))))
+
       dataRetrievalWithData(emptyUserAnswers)
 
       val request =
@@ -119,7 +123,31 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       status(result) mustEqual SEE_OTHER
       redirectLocation(result).value mustEqual s"${controllers.routes.CancellationSubmissionConfirmationController.onPageLoad(departureId)}"
+    }
 
+    "must return InternalServerError when the submission fails" in {
+      checkCancellationStatus()
+
+      when(mockRenderer.render(any(), any())(any()))
+        .thenReturn(Future.successful(Html("")))
+
+      when(mockSubmissionService.submitCancellation(any())(any()))
+        .thenReturn(Future.successful(Left(InvalidState)))
+
+      dataRetrievalWithData(emptyUserAnswers)
+
+      val request        = FakeRequest(POST, cancellationReasonRoute)
+        .withFormUrlEncodedBody(("value", "answer"))
+      val templateCaptor = ArgumentCaptor.forClass(classOf[String])
+      val jsonCaptor     = ArgumentCaptor.forClass(classOf[JsObject])
+
+      val result = route(app, request).value
+
+      status(result) mustEqual INTERNAL_SERVER_ERROR
+
+      verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
+
+      templateCaptor.getValue mustEqual "internalServerError.njk"
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {
