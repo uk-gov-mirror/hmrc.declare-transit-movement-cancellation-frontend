@@ -20,11 +20,10 @@ import config.FrontendAppConfig
 import logging.Logging
 import models.DepartureId
 import models.messages.CancellationRequest
-import models.response.{MRNAllocatedMessage, Messages, ResponseDeparture}
+import models.response.{MRNAllocatedMessage, MessageSummary, ResponseDeparture}
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsError, JsPath, JsonValidationError}
 import uk.gov.hmrc.http.HttpReads.is2xx
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,11 +48,17 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
     }
   }
 
-  def getMessages(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[ConnectorResponse[Messages]] = {
-    val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}/messages"
+  def getMessageSummary(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[ConnectorResponse[MessageSummary]] = {
+    val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}/messages/summary"
     val header     = hc.withExtraHeaders(ChannelHeader(channel))
 
-    http.GET[ConnectorResponse[Messages]](serviceUrl)(connectorResponseHttpReads(departureId, logger), header, ec)
+    http.GET[ConnectorResponse[MessageSummary]](serviceUrl)(connectorResponseHttpReads(departureId, logger), header, ec)
+  }
+
+  def getMrnAllocatedMessage(departureId: DepartureId, messageUrl: String)(implicit hc: HeaderCarrier): Future[ConnectorResponse[MRNAllocatedMessage]] = {
+    val header     = hc.withExtraHeaders(ChannelHeader(channel))
+
+    http.GET[ConnectorResponse[MRNAllocatedMessage]](appConfig.departureBaseUrl + messageUrl)(connectorResponseHttpReads(departureId, logger), header, ec)
   }
 
   def submitCancellation(
