@@ -36,16 +36,18 @@ class CancellationSubmissionService @Inject()(
   def submitCancellation(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[ServiceErrorResponse, HttpResponse]] = {
     userAnswers.get(CancellationReasonPage(userAnswers.id)).map(
       cancellationReason =>
-        connector.getMessages(userAnswers.id).flatMap{
-          case Right(messages) =>
-            messages.getMRNAllocatedMessage match {
-              case Some(mrnMessage) =>
-                connector.submitCancellation(userAnswers.id, CancellationRequest(cancellationReason, timeMachine.today(), mrnMessage)).map {
-                  case Right(value) => Right(value)
-                  case Left(_)      => Left(InvalidState)
-                }
-              case None             =>
-                logger.error(s"[submitCancellation] no MRN allocated message found for departure id: ${userAnswers.id.index}")
+        connector.getMessageSummary(userAnswers.id).flatMap {
+          case Right(summary) =>
+            summary.messages.get("IE028") match {
+              case Some(value) => connector.getMrnAllocatedMessage(userAnswers.id, value).flatMap {
+                case Right(mrnMessage) =>
+                  connector.submitCancellation(userAnswers.id, CancellationRequest(cancellationReason, timeMachine.today(), mrnMessage)).map {
+                    case Right(value) => Right(value)
+                    case Left(_) => Left(InvalidState)
+                  }
+                case _ => Future.successful(Left(InvalidState))
+              }
+              case None => logger.warn(s"[submitCancellation] no MRNAllocatedMessage found for departureId: ${userAnswers.id.index}")
                 Future.successful(Left(InvalidState))
             }
           case _ => Future.successful(Left(InvalidState))

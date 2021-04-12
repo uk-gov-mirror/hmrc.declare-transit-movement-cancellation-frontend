@@ -22,8 +22,8 @@ import generators.Generators
 import helper.WireMockServerHandler
 import models.LocalReferenceNumber
 import models.messages.CancellationRequest
+import models.response._
 import models.response.errors.{InvalidStatus, MalformedBody}
-import models.response.{MRNAllocatedMessage, MRNAllocatedRootLevel, Message, Messages, PrincipalTraderDetails, ResponseDeparture}
 import org.scalacheck.Gen
 import org.scalatest.EitherValues
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -32,10 +32,10 @@ import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.Helpers
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.Authorization
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler with ScalaCheckPropertyChecks with Generators with EitherValues {
   implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
@@ -92,7 +92,62 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
       }
     }
 
-    "getMessages" - {
+    "getMessageSummary" - {
+      "must return a successful future response" in {
+        val messagesResponseJson = Json.obj(
+          "departureId" -> 23,
+          "messages" -> Json.obj("IE015" -> "theFirstUrl", "IE028" -> "theSecondUrl")
+        )
+
+        val expectedResult = MessageSummary(
+          departureId = 23,
+          messages = Map(
+            "IE015" -> "theFirstUrl",
+            "IE028" -> "theSecondUrl"
+          )
+        )
+
+        server.stubFor(
+          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages/summary"))
+            .withHeader("Channel", containing("web"))
+            .willReturn(okJson(messagesResponseJson.toString()))
+        )
+
+        connector.getMessageSummary(departureId).futureValue mustBe Right(expectedResult)
+      }
+
+      "must return Left MalformedBody if messages json is malformed" in {
+        val messagesResponseJson = Json.obj(
+          "depurId" -> 23,
+          "mees" -> Json.obj("IE015" -> "theFirstUrl", "IE028" -> "theSecondUrl")
+        )
+
+        server.stubFor(
+          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages/summary"))
+            .withHeader("Channel", containing("web"))
+            .willReturn(okJson(messagesResponseJson.toString()))
+        )
+
+        connector.getMessageSummary(departureId).futureValue mustBe Left(MalformedBody)
+      }
+
+      "must return an InvalidStatus when an error response is returned from getMessageSummary" in {
+
+        forAll(errorResponses) {
+          errorResponse =>
+            server.stubFor(
+              get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages/summary"))
+                .withHeader("Channel", containing("web"))
+                .willReturn(
+                  aResponse()
+                    .withStatus(errorResponse)
+                )
+            )
+            connector.getMessageSummary(departureId).futureValue mustBe Left(InvalidStatus(errorResponse))
+        }
+      }
+    }
+    "getMrnAllocatedMessage" - {
       val mrnAllocatedMessage = <CC028B>
         <SynIdeMES1>SynIdeMES1</SynIdeMES1>
         <SynVerNumMES2>SynVerNumMES2</SynVerNumMES2>
@@ -104,13 +159,16 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
         <TimOfPreMES10>TimOfPreMES10</TimOfPreMES10>
         <IntConRefMES11>IntConRefMES11</IntConRefMES11>
         <RecRefMES12>RecRefMES12</RecRefMES12>
+        <RecRefQuaMES13>RecRefQuaMES13</RecRefQuaMES13>
         <AppRefMES14>AppRefMES14</AppRefMES14>
+        <PriMES15>PriMES15</PriMES15>
         <AckReqMES16>AckReqMES16</AckReqMES16>
         <ComAgrIdMES17>ComAgrIdMES17</ComAgrIdMES17>
         <TesIndMES18>TesIndMES18</TesIndMES18>
         <MesIdeMES19>MesIdeMES19</MesIdeMES19>
         <MesTypMES20>MesTypMES20</MesTypMES20>
         <ComAccRefMES21>ComAccRefMES21</ComAccRefMES21>
+        <MesSeqNumMES22>MesSeqNumMES22</MesSeqNumMES22>
         <FirAndLasTraMES23>FirAndLasTraMES23</FirAndLasTraMES23>
         <HEAHEA>
           <RefNumHEA4>lrn</RefNumHEA4>
@@ -134,57 +192,87 @@ class DepartureMovementConnectorSpec extends SpecBase with WireMockServerHandler
 
       "must return a successful future response" in {
         val messagesResponseJson = Json.obj(
-          "messages" -> Json.arr(
-            Json.obj("messageType" -> "IE007", "message" -> "<CC007B></CC007B>"),
-            Json.obj("messageType" -> "IE028", "message" -> mrnAllocatedMessage.toString()),
-          )
+          "dateTime" -> LocalDateTime.now().toString,
+          "messageType" -> "IE028",
+          "messageCorrelationId" -> 2,
+          "message" -> mrnAllocatedMessage.toString()
         )
 
-        val expectedResult = Messages(
-          Seq(
-            Message("IE007", <CC007B></CC007B>),
-            Message("IE028", mrnAllocatedMessage)
-          )
+        val expectedResult = MRNAllocatedMessage(
+          MRNAllocatedRootLevel(
+            "SynIdeMES1",
+            "SynVerNumMES2",
+            "MesSenMES3",
+            Some("SenIdeCodQuaMES4"),
+            "MesRecMES6",
+            Some("RecIdeCodQuaMES7"),
+            "DatOfPreMES9",
+            "TimOfPreMES10",
+            "IntConRefMES11",
+            Some("RecRefMES12"),
+            Some("RecRefQuaMES13"),
+            "AppRefMES14",
+            Some("PriMES15"),
+            Some("AckReqMES16"),
+            Some("ComAgrIdMES17"),
+            Some("TesIndMES18"),
+            "MesIdeMES19",
+            "MesTypMES20",
+            Some("ComAccRefMES21"),
+            Some("MesSeqNumMES22"),
+            Some("FirAndLasTraMES23")
+          ),
+          "mrn",
+          PrincipalTraderDetails(Some("name"), Some("street"), Some("xx11xx"), Some("city"), Some("GB"), Some("EN"), Some("eori"), Some("holder tir")),
+          "AB12345C"
         )
+
+        val url = s"/$startUrl/movements/departures/${departureId.index}/messages/2"
 
         server.stubFor(
-          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+          get(urlEqualTo(url))
             .withHeader("Channel", containing("web"))
             .willReturn(okJson(messagesResponseJson.toString()))
         )
 
-        connector.getMessages(departureId).futureValue mustBe Right(expectedResult)
+        connector.getMrnAllocatedMessage(departureId, url).futureValue mustBe Right(expectedResult)
       }
 
       "must return Left MalformedBody if messages json is malformed" in {
         val messagesResponseJson = Json.obj(
-          "messages" -> Json.arr(
-            Json.obj("messageType" -> "IE007", "mege" -> "<CC007B></CC007B>"),
-          )
+          "dateTime" -> LocalDateTime.now().toString,
+          "messageType" -> "IE028",
+          "messageCorrelationId" -> 2,
+          "mage" -> mrnAllocatedMessage.toString()
         )
 
+        val url = s"/$startUrl/movements/departures/${departureId.index}/messages/2"
+
         server.stubFor(
-          get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+          get(urlEqualTo(url))
             .withHeader("Channel", containing("web"))
             .willReturn(okJson(messagesResponseJson.toString()))
         )
 
-        connector.getMessages(departureId).futureValue mustBe Left(MalformedBody)
+        connector.getMrnAllocatedMessage(departureId, url).futureValue mustBe Left(MalformedBody)
       }
 
-      "must return a None when an error response is returned from getDepartures" in {
+      "must return an InvalidStatus when an error response is returned from getMrnAllocatedMessage" in {
 
         forAll(errorResponses) {
           errorResponse =>
+            val url = s"/$startUrl/movements/departures/${departureId.index}/messages/2"
+
             server.stubFor(
-              get(urlEqualTo(s"/$startUrl/movements/departures/${departureId.index}/messages"))
+              get(urlEqualTo(url))
                 .withHeader("Channel", containing("web"))
                 .willReturn(
                   aResponse()
                     .withStatus(errorResponse)
                 )
             )
-            connector.getMessages(departureId).futureValue mustBe Left(InvalidStatus(errorResponse))
+
+            connector.getMrnAllocatedMessage(departureId, url).futureValue mustBe Left(InvalidStatus(errorResponse))
         }
       }
     }

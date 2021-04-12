@@ -16,18 +16,10 @@
 
 package models.response
 
-import com.lucidchart.open.xtract.XmlReader
 import play.api.libs.json.{Json, Reads}
 
-case class Messages(messages: Seq[Message]){
-  def getMRNAllocatedMessage: Option[MRNAllocatedMessage] = messages
-    .collectFirst{
-    case message if message.messageType == "IE028" => message.message
-  }.flatMap(
-    message => XmlReader.of[MRNAllocatedMessage].read(message).toOption
-  )
-}
+case class MessageSummary(departureId: Long, messages: Map[String, String])
 
-object Messages {
-  implicit val reads: Reads[Messages] = Json.reads[Messages]
+object MessageSummary {
+  implicit val reads: Reads[MessageSummary] = Json.reads[MessageSummary]
 }

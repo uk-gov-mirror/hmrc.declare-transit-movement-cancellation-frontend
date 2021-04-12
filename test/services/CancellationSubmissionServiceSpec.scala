@@ -17,8 +17,8 @@
 package services
 
 import connectors.DepartureMovementConnector
-import models.response.errors.{InvalidState, InvalidStatus}
-import models.response.{Message, Messages}
+import models.response.errors.{InvalidState, InvalidStatus, MalformedBody}
+import models.response.{MRNAllocatedMessage, MRNAllocatedRootLevel, MessageSummary, PrincipalTraderDetails}
 import models.{DepartureId, EoriNumber, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.when
@@ -86,20 +86,52 @@ class CancellationSubmissionServiceSpec extends AnyFreeSpec with Matchers with M
       </CUSOFFDEPEPT>
     </CC028B>
 
+    val mrnAllocatedModel = MRNAllocatedMessage(
+      MRNAllocatedRootLevel(
+        "SynIdeMES1",
+        "SynVerNumMES2",
+        "MesSenMES3",
+        Some("SenIdeCodQuaMES4"),
+        "MesRecMES6",
+        Some("RecIdeCodQuaMES7"),
+        "DatOfPreMES9",
+        "TimOfPreMES10",
+        "IntConRefMES11",
+        Some("RecRefMES12"),
+        Some("RecRefQuaMES13"),
+        "AppRefMES14",
+        Some("PriMES15"),
+        Some("AckReqMES16"),
+        Some("ComAgrIdMES17"),
+        Some("TesIndMES18"),
+        "MesIdeMES19",
+        "MesTypMES20",
+        Some("ComAccRefMES21"),
+        Some("MesSeqNumMES22"),
+        Some("FirAndLasTraMES23")
+      ),
+      "mrn",
+      PrincipalTraderDetails(Some("name"), Some("street"), Some("xx11xx"), Some("city"), Some("GB"), Some("EN"), Some("eori"), Some("holder tir")),
+      "AB12345C"
+    )
+
   }
 
   "CancellationSubmissionService" - {
     "submit the message if messages is obtained and userAnswers exists" in new Setup {
-      val messages: Messages = Messages(
-        Seq(
-          Message("IE007", <CC007B></CC007B>),
-          Message("IE028", mrnAllocatedMessage)
+      val messageSummary: MessageSummary = MessageSummary(
+        departureId = 23,
+        messages = Map(
+          "IE015" -> "theFirstUrl",
+          "IE028" -> "theSecondUrl"
         )
       )
 
       val response = HttpResponse(Helpers.NO_CONTENT, "")
 
-      when(mockDepartureConnector.getMessages(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messages)))
+      when(mockDepartureConnector.getMessageSummary(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messageSummary)))
+      when(mockDepartureConnector.getMrnAllocatedMessage(eqTo(departureId), eqTo("theSecondUrl"))(any()))
+        .thenReturn(Future.successful(Right(mrnAllocatedModel)))
       when(mockDepartureConnector.submitCancellation(eqTo(departureId), any())(any()))
         .thenReturn(Future.successful(Right(response)))
 
@@ -109,14 +141,17 @@ class CancellationSubmissionServiceSpec extends AnyFreeSpec with Matchers with M
     }
 
     "return an invalid state if submit cancellation sending to departures fails" in new Setup {
-      val messages: Messages = Messages(
-        Seq(
-          Message("IE007", <CC007B></CC007B>),
-          Message("IE028", mrnAllocatedMessage)
+      val messageSummary: MessageSummary = MessageSummary(
+        departureId = 23,
+        messages = Map(
+          "IE015" -> "theFirstUrl",
+          "IE028" -> "theSecondUrl"
         )
       )
 
-      when(mockDepartureConnector.getMessages(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messages)))
+      when(mockDepartureConnector.getMessageSummary(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messageSummary)))
+      when(mockDepartureConnector.getMrnAllocatedMessage(eqTo(departureId), eqTo("theSecondUrl"))(any()))
+        .thenReturn(Future.successful(Right(mrnAllocatedModel)))
       when(mockDepartureConnector.submitCancellation(eqTo(departureId), any())(any()))
         .thenReturn(Future.successful(Left(InvalidStatus(Helpers.INTERNAL_SERVER_ERROR))))
 
@@ -125,15 +160,33 @@ class CancellationSubmissionServiceSpec extends AnyFreeSpec with Matchers with M
       service.submitCancellation(userAnswers).futureValue mustBe Left(InvalidState)
     }
 
-    "return an invalid state if no MRN allocated message is found" in new Setup {
-      val messages: Messages = Messages(
-        Seq(
-          Message("IE007", <CC007B></CC007B>),
-          Message("IE077", mrnAllocatedMessage)
+    "return an invalid state if getting the message fails" in new Setup {
+      val messageSummary: MessageSummary = MessageSummary(
+        departureId = 23,
+        messages = Map(
+          "IE015" -> "theFirstUrl",
+          "IE028" -> "theSecondUrl"
         )
       )
 
-      when(mockDepartureConnector.getMessages(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messages)))
+      when(mockDepartureConnector.getMessageSummary(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messageSummary)))
+      when(mockDepartureConnector.getMrnAllocatedMessage(eqTo(departureId), eqTo("theSecondUrl"))(any()))
+        .thenReturn(Future.successful(Left(MalformedBody)))
+
+      val userAnswers: UserAnswers = UserAnswers(departureId, EoriNumber("12345")).set(CancellationReasonPage(departureId), "some value").success.value
+
+      service.submitCancellation(userAnswers).futureValue mustBe Left(InvalidState)
+    }
+
+    "return an invalid state if no MRN allocated message is found" in new Setup {
+      val messageSummary: MessageSummary = MessageSummary(
+        departureId = 23,
+        messages = Map(
+          "IE015" -> "theFirstUrl"
+        )
+      )
+
+      when(mockDepartureConnector.getMessageSummary(eqTo(departureId))(any())).thenReturn(Future.successful(Right(messageSummary)))
 
       val userAnswers: UserAnswers = UserAnswers(departureId, EoriNumber("12345")).set(CancellationReasonPage(departureId), "some value").success.value
 
@@ -141,7 +194,7 @@ class CancellationSubmissionServiceSpec extends AnyFreeSpec with Matchers with M
     }
 
     "return an invalid state if get messages fails" in new Setup {
-      when(mockDepartureConnector.getMessages(eqTo(departureId))(any())).thenReturn(Future.successful(Left(InvalidStatus(Helpers.INTERNAL_SERVER_ERROR))))
+      when(mockDepartureConnector.getMessageSummary(eqTo(departureId))(any())).thenReturn(Future.successful(Left(InvalidStatus(Helpers.INTERNAL_SERVER_ERROR))))
 
       val userAnswers: UserAnswers = UserAnswers(departureId, EoriNumber("12345")).set(CancellationReasonPage(departureId), "some value").success.value
 
