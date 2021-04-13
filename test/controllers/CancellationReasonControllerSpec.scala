@@ -147,7 +147,14 @@ class CancellationReasonControllerSpec extends SpecBase with MockNunjucksRendere
 
       verify(mockRenderer, times(1)).render(templateCaptor.capture(), jsonCaptor.capture())(any())
 
-      templateCaptor.getValue mustEqual "internalServerError.njk"
+      val expectedJson = Json.obj(
+        "contactUrl" -> frontendAppConfig.nctsEnquiriesUrl
+      )
+
+      val jsonWithoutConfig = jsonCaptor.getValue - configKey
+
+      templateCaptor.getValue mustEqual "technicalDifficulties.njk"
+      jsonWithoutConfig must containJson(expectedJson)
     }
 
     "must return a Bad Request and errors when invalid data is submitted" in {

@@ -36,6 +36,7 @@ class FrontendAppConfig @Inject()(configuration: Configuration) {
   val betaFeedbackUrl                = s"$contactHost/contact/beta-feedback"
   val betaFeedbackUnauthenticatedUrl = s"$contactHost/contact/beta-feedback-unauthenticated"
   val signOutUrl: String             = configuration.get[String]("urls.logoutContinue") + configuration.get[String]("urls.feedback")
+  lazy val nctsEnquiriesUrl: String  = configuration.get[String]("urls.nctsEnquiries")
 
   lazy val authUrl: String                = configuration.get[Service]("auth").baseUrl
   lazy val loginUrl: String               = configuration.get[String]("urls.login")
@@ -47,6 +48,7 @@ class FrontendAppConfig @Inject()(configuration: Configuration) {
 
   lazy val manageTransitMovementsUrl: String               = configuration.get[String]("urls.manageTransitMovementsFrontend")
   lazy val manageTransitMovementsViewDeparturesUrl: String = s"$manageTransitMovementsUrl/test-only/view-departures"
+  lazy val serviceUrl                                      = s"$manageTransitMovementsUrl/index"
 
   lazy val departureBaseUrl: String = configuration.get[Service]("microservice.services.departures").baseUrl
   lazy val departureUrl: String     = configuration.get[Service]("microservice.services.departures").fullServiceUrl

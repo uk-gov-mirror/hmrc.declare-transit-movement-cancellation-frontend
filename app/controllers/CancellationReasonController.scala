@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
 import models.{DepartureId, Mode}
@@ -42,7 +43,8 @@ class CancellationReasonController @Inject()(
   formProvider: CancellationReasonFormProvider,
   cancellationSubmissionService: CancellationSubmissionService,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  renderer: Renderer,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -83,7 +85,12 @@ class CancellationReasonController @Inject()(
                 .flatMap(updatedAnswers =>
                   cancellationSubmissionService.submitCancellation(updatedAnswers).flatMap{
                     case Right(_) => Future.successful(Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers)))
-                    case Left(_) => renderer.render("internalServerError.njk").map(content => InternalServerError(content))
+                    case Left(_) => {
+                      val json = Json.obj(
+                        "contactUrl" -> appConfig.nctsEnquiriesUrl
+                      )
+                      renderer.render("technicalDifficulties.njk", json).map(content => InternalServerError(content))
+                    }
                   }
                 )
             }

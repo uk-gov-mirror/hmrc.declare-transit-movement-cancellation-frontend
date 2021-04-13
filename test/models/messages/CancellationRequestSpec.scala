@@ -87,7 +87,6 @@ class CancellationRequestSpec extends AnyFreeSpec with Matchers {
           <DocNumHEA5>mrn</DocNumHEA5>
           <DatOfCanReqHEA147>20180422</DatOfCanReqHEA147>
           <CanReaHEA250>just cause</CanReaHEA250>
-          <CanReaHEA250LNG>EN</CanReaHEA250LNG>
         </HEAHEA>
         <TRAPRIPC1>
           <NamPC17>name</NamPC17>
@@ -154,7 +153,6 @@ class CancellationRequestSpec extends AnyFreeSpec with Matchers {
           <DocNumHEA5>mrn</DocNumHEA5>
           <DatOfCanReqHEA147>20180422</DatOfCanReqHEA147>
           <CanReaHEA250>just cause</CanReaHEA250>
-          <CanReaHEA250LNG>EN</CanReaHEA250LNG>
         </HEAHEA>
         <TRAPRIPC1>
           <NamPC17>name</NamPC17>

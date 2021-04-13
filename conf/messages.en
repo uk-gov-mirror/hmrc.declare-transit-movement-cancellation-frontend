@@ -11,9 +11,9 @@ site.no = No
 site.yes = Yes
 site.continue = Continue
 site.submit = Submit
-site.service_name = declare-transit-movement-cancellation-frontend
+site.service_name = Manage your transit movements
 site.textarea.char_limit = (Limit is {0} characters)
-site.title.suffix = - declare-transit-movement-cancellation-frontend - GOV.UK
+site.title.suffix = - Manage your transit movements - GOV.UK
 site.youMust = You must
 
 error.title.prefix = Error:
@@ -57,6 +57,13 @@ unauthorisedWithoutGroupAccess.title = You cannot use this service group authori
 unauthorisedWithoutGroupAccess.heading = You cannot use this service
 unauthorisedWithoutGroupAccess.requestAccess = request access to NCTS
 unauthorisedWithoutGroupAccess.beforeUseThisService =  before you can use this service.
+
+technicalDifficulties.title = Sorry, there is a problem with the service
+technicalDifficulties.heading = Sorry, there is a problem with the service
+technicalDifficulties.tryAgain = Try again later.
+technicalDifficulties.savedAnswers = We saved your answers. They will be available for up to 28 days.
+technicalDifficulties.contact = You can
+technicalDifficulties.contact.link = contact the New Computerised Transit System helpdesk if you need to speak to someone about your transit movement(opens in a new tab).
 
 #### Compliance statement
 

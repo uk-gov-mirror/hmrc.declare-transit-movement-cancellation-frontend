@@ -38,7 +38,6 @@ case class CancellationRequest(
       <DocNumHEA5>{movementReferenceNumber}</DocNumHEA5>
       <DatOfCanReqHEA147>{dateOfCancellation.format(dateFormatter)}</DatOfCanReqHEA147>
       <CanReaHEA250>{cancellationReason}</CanReaHEA250>
-      <CanReaHEA250LNG>EN</CanReaHEA250LNG>
     </HEAHEA>
     {principal.toXml}
     <CUSOFFDEPEPT>
