@@ -39,8 +39,8 @@ phaseBanner.3 = will help us to improve it.
 checkYourAnswers.title = Check your answers
 checkYourAnswers.heading = Check your answers
 
-index.title = declare-transit-movement-cancellation-frontend
-index.heading = declare-transit-movement-cancellation-frontend
+index.title = Manage your transit movements - GOV.UK
+index.heading = Manage your transit movements
 index.guidance = Welcome to your new frontend. Please see the README file for a guide to getting started.
 
 session_expired.title = For your security, this service has been reset
