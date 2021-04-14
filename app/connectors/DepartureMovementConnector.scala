@@ -19,17 +19,18 @@ package connectors
 import config.FrontendAppConfig
 import logging.Logging
 import models.DepartureId
-import models.response.ResponseDeparture
+import models.messages.CancellationRequest
+import models.response.{MRNAllocatedMessage, MessageSummary, ResponseDeparture}
 import play.api.http.HeaderNames
 import uk.gov.hmrc.http.HttpReads.is2xx
-import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+
+
 class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, http: HttpClient)(implicit ec: ExecutionContext) extends Logging {
-  implicit val hc: HeaderCarrier = HeaderCarrier(Some(Authorization("BearerToken")))
 
   private val channel: String = "web"
 
@@ -47,15 +48,36 @@ class DepartureMovementConnector @Inject()(val appConfig: FrontendAppConfig, htt
     }
   }
 
+  def getMessageSummary(departureId: DepartureId)(implicit hc: HeaderCarrier): Future[ConnectorResponse[MessageSummary]] = {
+    val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}/messages/summary"
+    val header     = hc.withExtraHeaders(ChannelHeader(channel))
+
+    http.GET[ConnectorResponse[MessageSummary]](serviceUrl)(connectorResponseHttpReads(departureId, logger), header, ec)
+  }
+
+  def getMrnAllocatedMessage(departureId: DepartureId, messageUrl: String)(implicit hc: HeaderCarrier): Future[ConnectorResponse[MRNAllocatedMessage]] = {
+    val header     = hc.withExtraHeaders(ChannelHeader(channel))
+
+    http.GET[ConnectorResponse[MRNAllocatedMessage]](appConfig.departureBaseUrl + messageUrl)(connectorResponseHttpReads(departureId, logger), header, ec)
+  }
+
+  def submitCancellation(
+                          departureId: DepartureId, cancellationRequest: CancellationRequest
+                        )(implicit hc: HeaderCarrier): Future[ConnectorResponse[HttpResponse]] = {
+    val serviceUrl = s"${appConfig.departureUrl}/movements/departures/${departureId.index}/messages"
+    val header     = hc
+      .withExtraHeaders(ChannelHeader(channel), ContentTypeHeader("application/xml"))
+
+    http.POSTString[ConnectorResponse[HttpResponse]](serviceUrl, cancellationRequest.toXml.toString())(
+      connectorResponseDefaultReads(departureId, logger), header, implicitly
+    )
+  }
+
   object ChannelHeader {
     def apply(value: String): (String, String) = ("Channel", value)
   }
 
   object ContentTypeHeader {
     def apply(value: String): (String, String) = (HeaderNames.CONTENT_TYPE, value)
-  }
-
-  object AuthorizationHeader {
-    def apply(value: String): (String, String) = (HeaderNames.AUTHORIZATION, value)
   }
 }

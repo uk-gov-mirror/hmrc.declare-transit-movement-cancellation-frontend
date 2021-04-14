@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.FrontendAppConfig
 import controllers.actions._
 import forms.CancellationReasonFormProvider
 import models.{DepartureId, Mode}
@@ -25,6 +26,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import renderer.Renderer
+import services.CancellationSubmissionService
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendBaseController
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 
@@ -39,8 +41,10 @@ class CancellationReasonController @Inject()(
   requireData: DataRequiredAction,
   navigator: Navigator,
   formProvider: CancellationReasonFormProvider,
+  cancellationSubmissionService: CancellationSubmissionService,
   val controllerComponents: MessagesControllerComponents,
-  renderer: Renderer
+  renderer: Renderer,
+  appConfig: FrontendAppConfig
 )(implicit ec: ExecutionContext)
     extends FrontendBaseController
     with I18nSupport
@@ -76,11 +80,20 @@ class CancellationReasonController @Inject()(
               renderer.render(template, json).map(BadRequest(_))
             },
             value => {
-              for {
-                updatedAnswers <- Future.fromTry(request.userAnswers.set(CancellationReasonPage(departureId), value))
-              } yield Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers))
+              Future
+                .fromTry(request.userAnswers.set(CancellationReasonPage(departureId), value))
+                .flatMap(updatedAnswers =>
+                  cancellationSubmissionService.submitCancellation(updatedAnswers).flatMap{
+                    case Right(_) => Future.successful(Redirect(navigator.nextPage(CancellationReasonPage(departureId), mode, updatedAnswers)))
+                    case Left(_) => {
+                      val json = Json.obj(
+                        "contactUrl" -> appConfig.nctsEnquiriesUrl
+                      )
+                      renderer.render("technicalDifficulties.njk", json).map(content => InternalServerError(content))
+                    }
+                  }
+                )
             }
-            //TODO:CONVERT VALUE TO XML IS ON A SEPARATE TICKET
           )
 
     }
