@@ -24,7 +24,6 @@ import helper.WireMockServerHandler
 import models.LocalReferenceNumber
 import models.messages.CancellationRequest
 import models.response._
-import models.response.errors.InvalidStatus
 import org.scalacheck.Gen
 import org.scalatest.EitherValues
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
