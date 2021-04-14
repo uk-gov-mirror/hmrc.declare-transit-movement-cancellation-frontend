@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.response.errors
+package services.responses
 
 sealed trait ServiceErrorResponse
 

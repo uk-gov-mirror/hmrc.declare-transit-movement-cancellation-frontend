@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import connectors.responses.{ConnectorErrorResponse, InvalidStatus, MalformedBody}
 import controllers.Assets.OK
 import logging.Logging
 import models.DepartureId
-import models.response.errors.{ConnectorErrorResponse, InvalidStatus, MalformedBody}
 import play.api.Logger
 import play.api.libs.json.{JsError, JsSuccess, Reads}
 import uk.gov.hmrc.http.HttpReads.is2xx

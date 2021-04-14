@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.response.errors
+package connectors.responses
 
 sealed trait ConnectorErrorResponse
 

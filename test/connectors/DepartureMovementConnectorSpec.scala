@@ -18,12 +18,13 @@ package connectors
 
 import base.SpecBase
 import com.github.tomakehurst.wiremock.client.WireMock._
+import connectors.responses.{InvalidStatus, MalformedBody}
 import generators.Generators
 import helper.WireMockServerHandler
 import models.LocalReferenceNumber
 import models.messages.CancellationRequest
 import models.response._
-import models.response.errors.{InvalidStatus, MalformedBody}
+import models.response.errors.InvalidStatus
 import org.scalacheck.Gen
 import org.scalatest.EitherValues
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks

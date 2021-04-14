@@ -20,7 +20,6 @@ import base.{MockNunjucksRendererApp, SpecBase}
 import forms.CancellationReasonFormProvider
 import matchers.JsonMatchers
 import models.LocalReferenceNumber
-import models.response.errors.InvalidState
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{times, verify, when}
@@ -31,6 +30,7 @@ import play.api.mvc.Call
 import play.api.test.{FakeRequest, Helpers}
 import play.api.test.Helpers._
 import play.twirl.api.Html
+import services.responses.InvalidState
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.viewmodels.NunjucksSupport
 

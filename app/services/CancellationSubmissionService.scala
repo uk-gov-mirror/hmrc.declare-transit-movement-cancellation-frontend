@@ -18,10 +18,10 @@ package services
 
 import connectors.DepartureMovementConnector
 import logging.Logging
+import models.UserAnswers
 import models.messages.CancellationRequest
-import models.response.errors.{InvalidState, ServiceErrorResponse}
-import models.{DepartureId, UserAnswers}
 import pages.CancellationReasonPage
+import services.responses.{InvalidState, ServiceErrorResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.TimeMachine
 

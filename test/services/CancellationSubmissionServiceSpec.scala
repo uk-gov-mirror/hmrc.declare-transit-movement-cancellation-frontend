@@ -17,7 +17,7 @@
 package services
 
 import connectors.DepartureMovementConnector
-import models.response.errors.{InvalidState, InvalidStatus, MalformedBody}
+import connectors.responses.{InvalidStatus, MalformedBody}
 import models.response.{MRNAllocatedMessage, MRNAllocatedRootLevel, MessageSummary, PrincipalTraderDetails}
 import models.{DepartureId, EoriNumber, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -30,6 +30,7 @@ import org.scalatest.time.{Millis, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import pages.CancellationReasonPage
 import play.api.test.Helpers
+import services.responses.InvalidState
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import java.time.LocalDate
