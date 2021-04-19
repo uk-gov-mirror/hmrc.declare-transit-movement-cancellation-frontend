@@ -47,7 +47,7 @@ class CancellationStatusAction(
 )(implicit protected val executionContext: ExecutionContext)
     extends ActionRefiner[IdentifierRequest, AuthorisedRequest] {
 
-  final val validStatus: Seq[String] = Seq("DepartureSubmitted", "MrnAllocated", "PositiveAcknowledgement")
+  final val validStatus: Seq[String] = Seq("GuaranteeNotValid", "MrnAllocated", "NoReleaseForTransit","ControlDecisionNotification" )
 
   override protected def refine[A](request: IdentifierRequest[A]): Future[Either[Result, AuthorisedRequest[A]]] = {
 
